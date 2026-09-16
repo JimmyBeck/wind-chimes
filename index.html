@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>金鱼梦 · 锦鲤风铃生成艺术 (仿思花《旧梦》)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 主画布 -->
+  <canvas id="chimeCanvas"></canvas>
+
+  <!-- 艺术标题题跋 -->
+  <header class="art-header">
+    <div class="art-title">
+      <span>金鱼梦</span>
+    </div>
+    <div class="art-subtitle">仿思花《旧梦》· 交互式三维锦鲤风铃生成艺术 · 作者 崽崽</div>
+  </header>
+
+  <!-- 浮动快捷操作栏 -->
+  <div class="floating-bar">
+    <button class="icon-btn" id="gustBtn" title="拂来一阵微风，激起自上而下的柳叶涟漪行波">
+      <span class="icon">🍃</span>
+      <span class="btn-text">拂来清风</span>
+    </button>
+    <button class="icon-btn" id="bgAudioBtn" title="播放/暂停原生夏日风铃音轨">
+      <span class="icon">🎵</span>
+      <span class="btn-text">风铃原声</span>
+    </button>
+    <button class="icon-btn" id="replayBtn" title="重新播放如梦初醒的展开序幕">
+      <span class="icon">🎬</span>
+      <span class="btn-text">诗意展开</span>
+    </button>
+    <button class="icon-btn" id="exportBtn" title="导出高分辨率艺术海报">
+      <span class="icon">📷</span>
+      <span class="btn-text">导出海报</span>
+    </button>
+    <button class="icon-btn" id="togglePanelBtn" title="展开全参数调节控制台">
+      <span class="icon">⚙️</span>
+      <span class="btn-text">参数调节</span>
+    </button>
+    <button class="icon-btn" id="fullscreenBtn" title="全屏禅意沉浸模式">
+      <span class="icon">⛶</span>
+    </button>
+  </div>
+
+  <!-- 底部交互指引 -->
+  <footer class="hint-footer">
+    <span class="hint-dot"></span>
+    <span>按住拖拽 3D 旋转视角 · 鼠标拂过风铃发声 · 单击激起自上而下涟漪行波</span>
+  </footer>
+
+  <!-- 侧边参数设置抽屉 -->
+  <aside class="settings-drawer" id="settingsDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">装置参数配置台</div>
+      <button class="close-btn" id="closeDrawerBtn">×</button>
+    </div>
+
+    <div class="drawer-content">
+
+      <!-- 1. 意境预设 -->
+      <div class="config-group">
+        <div class="group-title">🎨 意境预设 (Style Presets)</div>
+        <div class="preset-grid">
+          <button class="preset-btn active" data-preset="goldenfish">🎐 金鱼梦</button>
+          <button class="preset-btn" data-preset="golden">🌅 暮霭金鳞</button>
+          <button class="preset-btn" data-preset="jade">🌊 碧波翠微</button>
+          <button class="preset-btn" data-preset="night">🌌 玄夜水墨</button>
+        </div>
+      </div>
+
+      <!-- 2. 结构参数 -->
+      <div class="config-group">
+        <div class="group-title">📐 风铃构型 (Structure)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>同心圆环数</span>
+            <span class="control-value" id="valNumRings">7 层</span>
+          </div>
+          <input type="range" id="numRings" min="3" max="8" step="1" value="7">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>垂线数量</span>
+            <span class="control-value" id="valNumStrands">34 根</span>
+          </div>
+          <input type="range" id="numStrands" min="12" max="48" step="2" value="34">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>顶部外环半径</span>
+            <span class="control-value" id="valTopRadius">195 px</span>
+          </div>
+          <input type="range" id="topRadius" min="100" max="280" step="10" value="195">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>悬垂深度</span>
+            <span class="control-value" id="valDropLength">680 px</span>
+          </div>
+          <input type="range" id="dropLength" min="350" max="850" step="20" value="680">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>下摆扩散比率</span>
+            <span class="control-value" id="valSpreadRatio">0.95</span>
+          </div>
+          <input type="range" id="spreadRatio" min="0.5" max="1.6" step="0.05" value="0.95">
+        </div>
+      </div>
+
+            <!-- 3. 挂件形态与素材选择 -->
+      <div class="config-group">
+        <div class="group-title">🎏 挂件形态与素材 (Pendant Motif)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>挂件形态</span>
+          </div>
+          <select id="pendantType">
+            <option value="koi" selected>灵动锦鲤 (原版水彩游鱼)</option>
+            <option value="butterfly">翩跹彩蝶 (3D双翅微振)</option>
+            <option value="ginkgo">沉香金叶 (银杏叶翻卷)</option>
+            <option value="crane">素雅青鸟 (立体千纸鹤)</option>
+            <option value="custom">🖼️ 自定义图片 (本地PNG上传)</option>
+          </select>
+        </div>
+        <div class="control-item" id="customUploadContainer" style="display: none;">
+          <button class="secondary-btn" style="width: 100%;" id="uploadImageBtn">📁 上传透明底 PNG 吊坠</button>
+          <input type="file" id="customImageInput" accept="image/*" style="display: none;">
+          <div id="uploadFileName" style="font-size: 11px; color: #8C847B; margin-top: 4px; text-align: center;">未选择文件</div>
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>挂件数量</span>
+            <span class="control-value" id="valKoiCount">26 条</span>
+          </div>
+          <input type="range" id="koiCount" min="4" max="45" step="1" value="26">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>挂件体型</span>
+            <span class="control-value" id="valKoiScale">1.05x</span>
+          </div>
+          <input type="range" id="koiScale" min="0.6" max="1.8" step="0.05" value="1.05">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>动态节奏</span>
+            <span class="control-value" id="valKoiSpeed">1.00x</span>
+          </div>
+          <input type="range" id="koiSpeed" min="0.4" max="2.2" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>摆幅强度</span>
+            <span class="control-value" id="valKoiWiggleAmp">1.00x</span>
+          </div>
+          <input type="range" id="koiWiggleAmp" min="0.3" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>国画配色方案</span>
+          </div>
+          <select id="koiColorTheme">
+            <option value="cinnabar" selected>朱砂红金 (原版复刻)</option>
+            <option value="golden">锦绣赤金</option>
+            <option value="cyan">翠微碧波</option>
+            <option value="monochrome">水墨丹顶</option>
+            <option value="iridescent">五彩幻锦</option>
+          </select>
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>游动/朝向分布</span>
+          </div>
+          <select id="koiFacingMode">
+            <option value="auto" selected>自由漫游 (顺逆交错)</option>
+            <option value="cw">顺时针环游</option>
+            <option value="ccw">逆时针环游</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. 珠帘与晶石 -->
+      <div class="config-group">
+        <div class="group-title">💎 琉璃珠饰 (Beads & Dew)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>串珠密度</span>
+            <span class="control-value" id="valBeadDensity">1.00x</span>
+          </div>
+          <input type="range" id="beadDensity" min="0.4" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>珠粒大小</span>
+            <span class="control-value" id="valBeadSize">1.00x</span>
+          </div>
+          <input type="range" id="beadSize" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>琉璃色泽</span>
+          </div>
+          <select id="beadTheme">
+            <option value="blueGreen" selected>天青湖蓝 + 翡翠绿 (原作)</option>
+            <option value="amberGold">落日琥珀流金</option>
+            <option value="purpleCrystal">紫玉荧晶</option>
+            <option value="iceWhite">冰雪清透</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <span>飘落水露微粒</span>
+          <label class="switch">
+            <input type="checkbox" id="dewParticles" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+            <!-- 5. 柳叶微重力与非同步风动 -->
+      <div class="config-group">
+        <div class="group-title">🍃 柳叶微重力与非同步风动 (Willow Wave Physics)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>微弱重力 (柔顺回正拉力)</span>
+            <span class="control-value" id="valGravity">0.05</span>
+          </div>
+          <input type="range" id="gravity" min="0.01" max="0.25" step="0.01" value="0.05">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>节段非同步相位差 (柳叶 S 波)</span>
+            <span class="control-value" id="valSegPhaseLag">0.42 rad</span>
+          </div>
+          <input type="range" id="segPhaseLag" min="0.10" max="0.80" step="0.02" value="0.42">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>非同步微风波纹灵动度</span>
+            <span class="control-value" id="valWindFlutter">1.60x</span>
+          </div>
+          <input type="range" id="windFlutter" min="0.0" max="3.0" step="0.05" value="1.60">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>空气流体阻尼 (消退柔韧度)</span>
+            <span class="control-value" id="valAirDrag">0.940</span>
+          </div>
+          <input type="range" id="airDrag" min="0.88" max="0.98" step="0.005" value="0.940">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>丝线极细轻盈度</span>
+            <span class="control-value" id="valStrandWidth">0.45 px</span>
+          </div>
+          <input type="range" id="strandWidth" min="0.3" max="1.2" step="0.05" value="0.45">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>环境微风强度</span>
+            <span class="control-value" id="valWindStrength">1.00x</span>
+          </div>
+          <input type="range" id="windStrength" min="0.0" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>3D 自转角速度</span>
+            <span class="control-value" id="valAutoRotateSpeed">0.0028</span>
+          </div>
+          <input type="range" id="autoRotateSpeed" min="-0.015" max="0.015" step="0.0005" value="0.0028">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>全局悬挂钟摆晃动</span>
+            <span class="control-value" id="valPendulumAmp">5.5 px</span>
+          </div>
+          <input type="range" id="pendulumAmp" min="0.0" max="15.0" step="0.5" value="5.5">
+        </div>
+        <div class="control-item" style="margin-top: 4px;">
+          <button class="secondary-btn" id="drawerGustBtn" style="width: 100%;">🍃 拂来一阵清风 (触发下行行波)</button>
+        </div>
+        <div class="control-item" style="margin-top: 6px;">
+          <div class="control-label"><span>手感一键预设</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px;">
+            <button class="preset-btn" id="feelPlumbBtn" style="padding: 6px 4px; font-size: 11px;">🎐 沉稳垂帘</button>
+            <button class="preset-btn active" id="feelBalancedBtn" style="padding: 6px 4px; font-size: 11px;">🍃 柳叶微风</button>
+            <button class="preset-btn" id="feelBreezeBtn" style="padding: 6px 4px; font-size: 11px;">🌬️ 云丝飘荡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. 背景 -->
+      <div class="config-group">
+        <div class="group-title">📜 背景 (Paper)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>宣纸底色色调</span>
+          </div>
+          <select id="bgTheme">
+            <option value="ricePaper" selected>澄心堂暖宣白 (默认)</option>
+            <option value="warmSilk">温润素绢米白</option>
+            <option value="bambooGreen">潇湘竹青淡绿</option>
+            <option value="darkNight">玄夜玄墨青黑</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 7. 音效与交互声音 -->
+      <div class="config-group">
+        <div class="group-title">🔔 声景与清脆风铃 (Soundscape)</div>
+        <div class="toggle-row">
+          <span>触碰风铃清脆鸣响</span>
+          <label class="switch">
+            <input type="checkbox" id="chimeAudioEnabled" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>主音量</span>
+            <span class="control-value" id="valVolume">75%</span>
+          </div>
+          <input type="range" id="volume" min="0.0" max="1.0" step="0.05" value="0.75">
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="action-grid">
+        <button class="secondary-btn" id="resetConfigBtn">恢复默认</button>
+        <button class="primary-btn" id="drawerExportBtn">导出海报</button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 核心模块化引擎脚本（按依赖顺序加载） -->
+  <script src="koi.js"></script>
+  <script src="sound.js"></script>
+  <script src="sketch.js"></script>
+
+  <!-- 主交互绑定逻辑 -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const app = new WindChimeApp();
+
+      // UI 元素引用
+      const drawer = document.getElementById("settingsDrawer");
+      const togglePanelBtn = document.getElementById("togglePanelBtn");
+      const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+      const bgAudioBtn = document.getElementById("bgAudioBtn");
+      const replayBtn = document.getElementById("replayBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const drawerExportBtn = document.getElementById("drawerExportBtn");
+      const fullscreenBtn = document.getElementById("fullscreenBtn");
+      const resetConfigBtn = document.getElementById("resetConfigBtn");
+
+      // 抽屉展开/折叠
+      togglePanelBtn.addEventListener("click", () => {
+        drawer.classList.toggle("open");
+      });
+      closeDrawerBtn.addEventListener("click", () => {
+        drawer.classList.remove("open");
+      });
+
+      // 原声风铃音乐播放/暂停
+      bgAudioBtn.addEventListener("click", () => {
+        const isPlaying = app.audio.toggleBgAudio();
+        if (isPlaying) {
+          bgAudioBtn.classList.add("active");
+          bgAudioBtn.querySelector(".btn-text").textContent = "暂停原声";
+        } else {
+          bgAudioBtn.classList.remove("active");
+          bgAudioBtn.querySelector(".btn-text").textContent = "风铃原声";
+        }
+      });
+
+      // 重播诗意展开动效
+      replayBtn.addEventListener("click", () => {
+        app.triggerUnfoldAnimation();
+      });
+
+      // 导出高分辨率海报
+      const doExport = () => {
+        app.exportPoster(2);
+      };
+      exportBtn.addEventListener("click", doExport);
+      drawerExportBtn.addEventListener("click", doExport);
+
+      // 全屏切换
+      fullscreenBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // 预设模式切换
+      const presetButtons = document.querySelectorAll(".preset-btn");
+      const presets = {
+        goldenfish: {
+          bgTheme: "ricePaper",
+          koiColorTheme: "cinnabar",
+          beadTheme: "blueGreen",
+          windStrength: 1.0,
+          spreadRatio: 0.95
+        },
+        golden: {
+          bgTheme: "warmSilk",
+          koiColorTheme: "golden",
+          beadTheme: "amberGold",
+          windStrength: 1.2,
+          spreadRatio: 1.05
+        },
+        jade: {
+          bgTheme: "bambooGreen",
+          koiColorTheme: "cyan",
+          beadTheme: "blueGreen",
+          windStrength: 0.8,
+          spreadRatio: 0.9
+        },
+        night: {
+          bgTheme: "darkNight",
+          koiColorTheme: "monochrome",
+          beadTheme: "purpleCrystal",
+          windStrength: 1.4,
+          spreadRatio: 1.1
+        }
+      };
+
+      presetButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          presetButtons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const p = presets[btn.dataset.preset];
+          if (p) {
+            Object.assign(app.config, p);
+            // 同步表单值
+            document.getElementById("bgTheme").value = p.bgTheme;
+            document.getElementById("koiColorTheme").value = p.koiColorTheme;
+            document.getElementById("beadTheme").value = p.beadTheme;
+            document.getElementById("windStrength").value = p.windStrength;
+            document.getElementById("spreadRatio").value = p.spreadRatio;
+            document.getElementById("valWindStrength").textContent = p.windStrength.toFixed(2) + "x";
+            document.getElementById("valSpreadRatio").textContent = p.spreadRatio.toFixed(2);
+            app.buildChimeStructure();
+          }
+        });
+      });
+
+      // 双向绑定辅助函数
+      const bindRange = (id, prop, format = (v) => v, onChange = null) => {
+        const input = document.getElementById(id);
+        const valSpan = document.getElementById("val" + id.charAt(0).toUpperCase() + id.slice(1));
+        if (!input) return;
+
+        input.addEventListener("input", (e) => {
+          const val = parseFloat(e.target.value);
+          app.config[prop] = val;
+          if (valSpan) valSpan.textContent = format(val);
+          if (onChange) onChange(val);
+        });
+      };
+
+      bindRange("numRings", "numRings", v => `${v} 层`, () => app.buildChimeStructure());
+      bindRange("numStrands", "numStrands", v => `${v} 根`, () => app.buildChimeStructure());
+      bindRange("topRadius", "topRadius", v => `${v} px`, () => app.buildChimeStructure());
+      bindRange("dropLength", "dropLength", v => `${v} px`, () => app.buildChimeStructure());
+      bindRange("spreadRatio", "spreadRatio", v => v.toFixed(2));
+
+      bindRange("koiCount", "koiCount", v => `${v} 条`, () => app.buildChimeStructure());
+      bindRange("koiScale", "koiScale", v => `${v.toFixed(2)}x`);
+      bindRange("koiSpeed", "koiSpeed", v => `${v.toFixed(2)}x`);
+      bindRange("koiWiggleAmp", "koiWiggleAmp", v => `${v.toFixed(2)}x`);
+
+      bindRange("beadDensity", "beadDensity", v => `${v.toFixed(2)}x`, () => app.buildChimeStructure());
+      bindRange("beadSize", "beadSize", v => `${v.toFixed(2)}x`);
+
+      bindRange("gravity", "gravity", v => v.toFixed(2));
+      bindRange("segPhaseLag", "segPhaseLag", v => `${v.toFixed(2)} rad`);
+      bindRange("windFlutter", "windFlutter", v => `${v.toFixed(2)}x`);
+      bindRange("airDrag", "airDrag", v => v.toFixed(3));
+      bindRange("strandWidth", "strandWidth", v => `${v.toFixed(2)} px`);
+      bindRange("autoRotateSpeed", "autoRotateSpeed", v => v.toFixed(4));
+      bindRange("windStrength", "windStrength", v => `${v.toFixed(2)}x`);
+      bindRange("pendulumAmp", "pendulumAmp", v => `${v.toFixed(1)} px`);
+
+      // 拂来清风按钮交互
+      const triggerBreeze = () => {
+        app.triggerGust(1.25);
+      };
+      const gustBtn = document.getElementById("gustBtn");
+      if (gustBtn) gustBtn.addEventListener("click", triggerBreeze);
+      const drawerGustBtn = document.getElementById("drawerGustBtn");
+      if (drawerGustBtn) drawerGustBtn.addEventListener("click", triggerBreeze);
+
+      // 快捷键支持 (H: 开关参数抽屉, Esc: 关闭抽屉, Space: 拂来微风)
+      window.addEventListener("keydown", (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (e.key === "h" || e.key === "H") {
+          e.preventDefault();
+          drawer.classList.toggle("open");
+        } else if (e.key === "Escape") {
+          drawer.classList.remove("open");
+        } else if (e.code === "Space") {
+          e.preventDefault();
+          triggerBreeze();
+        }
+      });
+
+      // 手感快捷按钮
+      const feelButtons = [
+        document.getElementById("feelPlumbBtn"),
+        document.getElementById("feelBalancedBtn"),
+        document.getElementById("feelBreezeBtn")
+      ];
+      const setFeelActive = (activeBtn) => {
+        feelButtons.forEach(b => b.classList.remove("active"));
+        if (activeBtn) activeBtn.classList.add("active");
+      };
+
+      // 1. 沉稳垂帘 (垂直感极强，微风拂过有微弱非同步波动，静谧安然)
+      document.getElementById("feelPlumbBtn").addEventListener("click", (e) => {
+        setFeelActive(e.target);
+        app.config.gravity = 0.12;
+        app.config.segPhaseLag = 0.25;
+        app.config.windFlutter = 0.8;
+        app.config.airDrag = 0.95;
+        document.getElementById("gravity").value = 0.12;
+        document.getElementById("valGravity").textContent = "0.12";
+        document.getElementById("segPhaseLag").value = 0.25;
+        document.getElementById("valSegPhaseLag").textContent = "0.25 rad";
+        document.getElementById("windFlutter").value = 0.8;
+        document.getElementById("valWindFlutter").textContent = "0.80x";
+        document.getElementById("airDrag").value = 0.95;
+        document.getElementById("valAirDrag").textContent = "0.950";
+      });
+
+      // 2. 柳叶微风 (原版神韵 - 微弱重力、每节非同步波动、轻盈飘荡)
+      document.getElementById("feelBalancedBtn").addEventListener("click", (e) => {
+        setFeelActive(e.target);
+        app.config.gravity = 0.05;
+        app.config.segPhaseLag = 0.42;
+        app.config.windFlutter = 1.6;
+        app.config.airDrag = 0.94;
+        document.getElementById("gravity").value = 0.05;
+        document.getElementById("valGravity").textContent = "0.05";
+        document.getElementById("segPhaseLag").value = 0.42;
+        document.getElementById("valSegPhaseLag").textContent = "0.42 rad";
+        document.getElementById("windFlutter").value = 1.6;
+        document.getElementById("valWindFlutter").textContent = "1.60x";
+        document.getElementById("airDrag").value = 0.94;
+        document.getElementById("valAirDrag").textContent = "0.940";
+      });
+
+      // 3. 云丝飘荡 (超低微重力，大幅非同步漫卷流转，极度空灵)
+      document.getElementById("feelBreezeBtn").addEventListener("click", (e) => {
+        setFeelActive(e.target);
+        app.config.gravity = 0.02;
+        app.config.segPhaseLag = 0.55;
+        app.config.windFlutter = 2.4;
+        app.config.airDrag = 0.92;
+        document.getElementById("gravity").value = 0.02;
+        document.getElementById("valGravity").textContent = "0.02";
+        document.getElementById("segPhaseLag").value = 0.55;
+        document.getElementById("valSegPhaseLag").textContent = "0.55 rad";
+        document.getElementById("windFlutter").value = 2.4;
+        document.getElementById("valWindFlutter").textContent = "2.40x";
+        document.getElementById("airDrag").value = 0.92;
+        document.getElementById("valAirDrag").textContent = "0.920";
+      });
+      bindRange("volume", "volume", v => `${Math.round(v * 100)}%`, (v) => app.audio.setVolume(v));
+
+      // 下拉选择绑定
+      const bindSelect = (id, prop, rebuild = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("change", (e) => {
+          app.config[prop] = e.target.value;
+          if (rebuild) app.buildChimeStructure();
+        });
+      };
+      // 挂件形态切换
+      const pendantTypeSelect = document.getElementById("pendantType");
+      const customUploadContainer = document.getElementById("customUploadContainer");
+      const uploadImageBtn = document.getElementById("uploadImageBtn");
+      const customImageInput = document.getElementById("customImageInput");
+      const uploadFileName = document.getElementById("uploadFileName");
+
+      pendantTypeSelect.addEventListener("change", (e) => {
+        app.config.pendantType = e.target.value;
+        customUploadContainer.style.display = e.target.value === "custom" ? "block" : "none";
+        app.buildChimeStructure();
+      });
+
+      uploadImageBtn.addEventListener("click", () => {
+        customImageInput.click();
+      });
+
+      customImageInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        uploadFileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            app.customImage = img;
+            app.config.pendantType = "custom";
+            pendantTypeSelect.value = "custom";
+            customUploadContainer.style.display = "block";
+            app.buildChimeStructure();
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      bindSelect("koiColorTheme", "koiColorTheme");
+      bindSelect("koiFacingMode", "koiFacingMode", true);
+      bindSelect("beadTheme", "beadTheme");
+      bindSelect("bgTheme", "bgTheme");
+
+      // 开关绑定
+      document.getElementById("dewParticles").addEventListener("change", (e) => {
+        app.config.dewParticles = e.target.checked;
+      });
+      document.getElementById("chimeAudioEnabled").addEventListener("change", (e) => {
+        app.config.chimeAudioEnabled = e.target.checked;
+        app.audio.interactiveEnabled = e.target.checked;
+      });
+
+      // 恢复默认按钮
+      resetConfigBtn.addEventListener("click", () => {
+        location.reload();
+      });
+    });
+  </script>
+</body>
+</html>

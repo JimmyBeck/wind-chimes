@@ -1,0 +1,25 @@
+# OS & System
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.swp
+*~
+
+# Sensitive configs & local notes
+*.yaml
+*.yml
+*.env*
+123/
+scratch/
+
+# Intermediate debug snapshots & logs
+*.log
+v[0-9]_*.png
+ref_*.png
+ref_demo*.html
+single_file_preview.png

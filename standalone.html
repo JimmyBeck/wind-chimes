@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>金鱼梦 · 锦鲤风铃生成艺术 (仿思花《旧梦》)</title>
+  <style>
+/* style.css - 金鱼梦 新中式极简生成艺术视觉界面样式表 */
+
+:root {
+  --primary-color: #C83E34;
+  --primary-hover: #A82E25;
+  --accent-blue: #3A86FF;
+  --text-main: #2B2A27;
+  --text-muted: #7A7770;
+  --panel-bg: rgba(253, 251, 247, 0.88);
+  --panel-border: rgba(210, 200, 185, 0.45);
+  --control-bg: rgba(240, 235, 225, 0.65);
+  --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #FAF8F3;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  color: var(--text-main);
+  user-select: none;
+}
+
+/* 主画布 */
+#chimeCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: block;
+  cursor: grab;
+}
+
+#chimeCanvas:active {
+  cursor: grabbing;
+}
+
+/* 顶部标题与艺术题跋 */
+.art-header {
+  position: absolute;
+  top: 24px;
+  left: 28px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.art-title {
+  font-family: "Songti SC", "Noto Serif SC", "STSong", serif;
+  font-size: 22px;
+  letter-spacing: 4px;
+  font-weight: 500;
+  color: #36322E;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.art-subtitle {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 12px;
+  color: #8C847B;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* 底部交互提示 */
+.hint-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  z-index: 10;
+  font-size: 12px;
+  color: #9C948B;
+  letter-spacing: 1px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #C83E34;
+  display: inline-block;
+  animation: pulseDot 2.2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.6); opacity: 1; }
+}
+
+/* 浮动快捷操作栏 */
+.floating-bar {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-btn {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-soft);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.5px;
+}
+
+.icon-btn:hover {
+  background: #FFFFFF;
+  border-color: rgba(200, 62, 52, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.icon-btn.active {
+  background: #C83E34;
+  color: #FFFFFF;
+  border-color: #C83E34;
+}
+
+/* 侧边设置抽屉 */
+.settings-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100%;
+  background: var(--panel-bg);
+  border-left: 1px solid var(--panel-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawer-title {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px 36px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 折叠分区卡片 */
+.config-group {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(220, 210, 195, 0.5);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555048;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* 预设网格 */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.preset-btn {
+  background: var(--control-bg);
+  border: 1px solid transparent;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  color: var(--text-main);
+}
+
+.preset-btn:hover {
+  background: #FFFFFF;
+  border-color: rgba(200, 62, 52, 0.4);
+}
+
+.preset-btn.active {
+  background: #FFFFFF;
+  border-color: #C83E34;
+  color: #C83E34;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(200, 62, 52, 0.15);
+}
+
+/* 控制行 */
+.control-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.control-item:last-child {
+  margin-bottom: 0;
+}
+
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6C665D;
+}
+
+.control-value {
+  font-family: monospace;
+  font-size: 11px;
+  color: #9C948B;
+}
+
+/* 滑动输入控件 */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #E4DED5;
+  outline: none;
+  transition: background 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #C83E34;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* 下拉选择器与文本域 */
+select, textarea, input[type="text"] {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid #DCD4C8;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+select:focus, textarea:focus, input[type="text"]:focus {
+  border-color: #C83E34;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 58px;
+  line-height: 1.5;
+}
+
+/* 开关复选框 */
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6C665D;
+  margin-bottom: 8px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #D6CEC3;
+  transition: 0.3s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #C83E34;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+/* 重置与操作按钮 */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.primary-btn {
+  background: #C83E34;
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+}
+
+.primary-btn:hover {
+  background: var(--primary-hover);
+}
+
+.secondary-btn {
+  background: #EFE9DE;
+  color: var(--text-main);
+  border: 1px solid #D8D0C2;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.secondary-btn:hover {
+  background: #E5DFC4;
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+  .settings-drawer {
+    width: 100%;
+  }
+  .art-header {
+    top: 16px;
+    left: 16px;
+  }
+  .art-title {
+    font-size: 18px;
+  }
+  .floating-bar {
+    top: 16px;
+    right: 16px;
+  }
+  .icon-btn span.btn-text {
+    display: none;
+  }
+  .hint-footer {
+    display: none;
+  }
+}
+
+</style>
+</head>
+<body>
+
+  <!-- 主画布 -->
+  <canvas id="chimeCanvas"></canvas>
+
+  <!-- 艺术标题题跋 -->
+  <header class="art-header">
+    <div class="art-title">
+      <span>金鱼梦</span>
+    </div>
+    <div class="art-subtitle">仿思花《旧梦》· 交互式三维锦鲤风铃生成艺术 · 作者 崽崽</div>
+  </header>
+
+  <!-- 浮动快捷操作栏 -->
+  <div class="floating-bar">
+    <button class="icon-btn" id="gustBtn" title="拂来一阵微风，激起自上而下的柳叶涟漪行波">
+      <span class="icon">🍃</span>
+      <span class="btn-text">拂来清风</span>
+    </button>
+    <button class="icon-btn" id="bgAudioBtn" title="播放/暂停原生夏日风铃音轨">
+      <span class="icon">🎵</span>
+      <span class="btn-text">风铃原声</span>
+    </button>
+    <button class="icon-btn" id="replayBtn" title="重新播放如梦初醒的展开序幕">
+      <span class="icon">🎬</span>
+      <span class="btn-text">诗意展开</span>
+    </button>
+    <button class="icon-btn" id="exportBtn" title="导出高分辨率艺术海报">
+      <span class="icon">📷</span>
+      <span class="btn-text">导出海报</span>
+    </button>
+    <button class="icon-btn" id="togglePanelBtn" title="展开全参数调节控制台">
+      <span class="icon">⚙️</span>
+      <span class="btn-text">参数调节</span>
+    </button>
+    <button class="icon-btn" id="fullscreenBtn" title="全屏禅意沉浸模式">
+      <span class="icon">⛶</span>
+    </button>
+  </div>
+
+  <!-- 底部交互指引 -->
+  <footer class="hint-footer">
+    <span class="hint-dot"></span>
+    <span>按住拖拽 3D 旋转视角 · 鼠标拂过风铃发声 · 单击激起自上而下涟漪行波</span>
+  </footer>
+
+  <!-- 侧边参数设置抽屉 -->
+  <aside class="settings-drawer" id="settingsDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">装置参数配置台</div>
+      <button class="close-btn" id="closeDrawerBtn">×</button>
+    </div>
+
+    <div class="drawer-content">
+
+      <!-- 1. 意境预设 -->
+      <div class="config-group">
+        <div class="group-title">🎨 意境预设 (Style Presets)</div>
+        <div class="preset-grid">
+          <button class="preset-btn active" data-preset="goldenfish">🎐 金鱼梦</button>
+          <button class="preset-btn" data-preset="golden">🌅 暮霭金鳞</button>
+          <button class="preset-btn" data-preset="jade">🌊 碧波翠微</button>
+          <button class="preset-btn" data-preset="night">🌌 玄夜水墨</button>
+        </div>
+      </div>
+
+      <!-- 2. 结构参数 -->
+      <div class="config-group">
+        <div class="group-title">📐 风铃构型 (Structure)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>同心圆环数</span>
+            <span class="control-value" id="valNumRings">7 层</span>
+          </div>
+          <input type="range" id="numRings" min="3" max="8" step="1" value="7">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>垂线数量</span>
+            <span class="control-value" id="valNumStrands">34 根</span>
+          </div>
+          <input type="range" id="numStrands" min="12" max="48" step="2" value="34">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>顶部外环半径</span>
+            <span class="control-value" id="valTopRadius">195 px</span>
+          </div>
+          <input type="range" id="topRadius" min="100" max="280" step="10" value="195">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>悬垂深度</span>
+            <span class="control-value" id="valDropLength">680 px</span>
+          </div>
+          <input type="range" id="dropLength" min="350" max="850" step="20" value="680">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>下摆扩散比率</span>
+            <span class="control-value" id="valSpreadRatio">0.95</span>
+          </div>
+          <input type="range" id="spreadRatio" min="0.5" max="1.6" step="0.05" value="0.95">
+        </div>
+      </div>
+
+            <!-- 3. 挂件形态与素材选择 -->
+      <div class="config-group">
+        <div class="group-title">🎏 挂件形态与素材 (Pendant Motif)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>挂件形态</span>
+          </div>
+          <select id="pendantType">
+            <option value="koi" selected>灵动锦鲤 (原版水彩游鱼)</option>
+            <option value="butterfly">翩跹彩蝶 (3D双翅微振)</option>
+            <option value="ginkgo">沉香金叶 (银杏叶翻卷)</option>
+            <option value="crane">素雅青鸟 (立体千纸鹤)</option>
+            <option value="custom">🖼️ 自定义图片 (本地PNG上传)</option>
+          </select>
+        </div>
+        <div class="control-item" id="customUploadContainer" style="display: none;">
+          <button class="secondary-btn" style="width: 100%;" id="uploadImageBtn">📁 上传透明底 PNG 吊坠</button>
+          <input type="file" id="customImageInput" accept="image/*" style="display: none;">
+          <div id="uploadFileName" style="font-size: 11px; color: #8C847B; margin-top: 4px; text-align: center;">未选择文件</div>
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>挂件数量</span>
+            <span class="control-value" id="valKoiCount">26 条</span>
+          </div>
+          <input type="range" id="koiCount" min="4" max="45" step="1" value="26">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>挂件体型</span>
+            <span class="control-value" id="valKoiScale">1.05x</span>
+          </div>
+          <input type="range" id="koiScale" min="0.6" max="1.8" step="0.05" value="1.05">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>动态节奏</span>
+            <span class="control-value" id="valKoiSpeed">1.00x</span>
+          </div>
+          <input type="range" id="koiSpeed" min="0.4" max="2.2" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>摆幅强度</span>
+            <span class="control-value" id="valKoiWiggleAmp">1.00x</span>
+          </div>
+          <input type="range" id="koiWiggleAmp" min="0.3" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>国画配色方案</span>
+          </div>
+          <select id="koiColorTheme">
+            <option value="cinnabar" selected>朱砂红金 (原版复刻)</option>
+            <option value="golden">锦绣赤金</option>
+            <option value="cyan">翠微碧波</option>
+            <option value="monochrome">水墨丹顶</option>
+            <option value="iridescent">五彩幻锦</option>
+          </select>
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>游动/朝向分布</span>
+          </div>
+          <select id="koiFacingMode">
+            <option value="auto" selected>自由漫游 (顺逆交错)</option>
+            <option value="cw">顺时针环游</option>
+            <option value="ccw">逆时针环游</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. 珠帘与晶石 -->
+      <div class="config-group">
+        <div class="group-title">💎 琉璃珠饰 (Beads & Dew)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>串珠密度</span>
+            <span class="control-value" id="valBeadDensity">1.00x</span>
+          </div>
+          <input type="range" id="beadDensity" min="0.4" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>珠粒大小</span>
+            <span class="control-value" id="valBeadSize">1.00x</span>
+          </div>
+          <input type="range" id="beadSize" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>琉璃色泽</span>
+          </div>
+          <select id="beadTheme">
+            <option value="blueGreen" selected>天青湖蓝 + 翡翠绿 (原作)</option>
+            <option value="amberGold">落日琥珀流金</option>
+            <option value="purpleCrystal">紫玉荧晶</option>
+            <option value="iceWhite">冰雪清透</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <span>飘落水露微粒</span>
+          <label class="switch">
+            <input type="checkbox" id="dewParticles" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+            <!-- 5. 柳叶微重力与非同步风动 -->
+      <div class="config-group">
+        <div class="group-title">🍃 柳叶微重力与非同步风动 (Willow Wave Physics)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>微弱重力 (柔顺回正拉力)</span>
+            <span class="control-value" id="valGravity">0.05</span>
+          </div>
+          <input type="range" id="gravity" min="0.01" max="0.25" step="0.01" value="0.05">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>节段非同步相位差 (柳叶 S 波)</span>
+            <span class="control-value" id="valSegPhaseLag">0.42 rad</span>
+          </div>
+          <input type="range" id="segPhaseLag" min="0.10" max="0.80" step="0.02" value="0.42">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>非同步微风波纹灵动度</span>
+            <span class="control-value" id="valWindFlutter">1.60x</span>
+          </div>
+          <input type="range" id="windFlutter" min="0.0" max="3.0" step="0.05" value="1.60">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>空气流体阻尼 (消退柔韧度)</span>
+            <span class="control-value" id="valAirDrag">0.940</span>
+          </div>
+          <input type="range" id="airDrag" min="0.88" max="0.98" step="0.005" value="0.940">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>丝线极细轻盈度</span>
+            <span class="control-value" id="valStrandWidth">0.45 px</span>
+          </div>
+          <input type="range" id="strandWidth" min="0.3" max="1.2" step="0.05" value="0.45">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>环境微风强度</span>
+            <span class="control-value" id="valWindStrength">1.00x</span>
+          </div>
+          <input type="range" id="windStrength" min="0.0" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>3D 自转角速度</span>
+            <span class="control-value" id="valAutoRotateSpeed">0.0028</span>
+          </div>
+          <input type="range" id="autoRotateSpeed" min="-0.015" max="0.015" step="0.0005" value="0.0028">
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>全局悬挂钟摆晃动</span>
+            <span class="control-value" id="valPendulumAmp">5.5 px</span>
+          </div>
+          <input type="range" id="pendulumAmp" min="0.0" max="15.0" step="0.5" value="5.5">
+        </div>
+        <div class="control-item" style="margin-top: 4px;">
+          <button class="secondary-btn" id="drawerGustBtn" style="width: 100%;">🍃 拂来一阵清风 (触发下行行波)</button>
+        </div>
+        <div class="control-item" style="margin-top: 6px;">
+          <div class="control-label"><span>手感一键预设</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px;">
+            <button class="preset-btn" id="feelPlumbBtn" style="padding: 6px 4px; font-size: 11px;">🎐 沉稳垂帘</button>
+            <button class="preset-btn active" id="feelBalancedBtn" style="padding: 6px 4px; font-size: 11px;">🍃 柳叶微风</button>
+            <button class="preset-btn" id="feelBreezeBtn" style="padding: 6px 4px; font-size: 11px;">🌬️ 云丝飘荡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. 背景 -->
+      <div class="config-group">
+        <div class="group-title">📜 背景 (Paper)</div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>宣纸底色色调</span>
+          </div>
+          <select id="bgTheme">
+            <option value="ricePaper" selected>澄心堂暖宣白 (默认)</option>
+            <option value="warmSilk">温润素绢米白</option>
+            <option value="bambooGreen">潇湘竹青淡绿</option>
+            <option value="darkNight">玄夜玄墨青黑</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 7. 音效与交互声音 -->
+      <div class="config-group">
+        <div class="group-title">🔔 声景与清脆风铃 (Soundscape)</div>
+        <div class="toggle-row">
+          <span>触碰风铃清脆鸣响</span>
+          <label class="switch">
+            <input type="checkbox" id="chimeAudioEnabled" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="control-item">
+          <div class="control-label">
+            <span>主音量</span>
+            <span class="control-value" id="valVolume">75%</span>
+          </div>
+          <input type="range" id="volume" min="0.0" max="1.0" step="0.05" value="0.75">
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="action-grid">
+        <button class="secondary-btn" id="resetConfigBtn">恢复默认</button>
+        <button class="primary-btn" id="drawerExportBtn">导出海报</button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 核心模块化引擎脚本（按依赖顺序加载） -->
+  <!-- 核心引擎内联 (koi.js + sound.js + sketch.js) -->
+  <script>
+/**
+ * koi.js (Pendants Engine) - 挂件渲染与多素材仿生动画系统
+ * 支持 5 大类艺术挂件形态：
+ * 1. 灵动锦鲤 (KoiFish) - 10节流体力学脊椎行波、双叶轻纱凤尾
+ * 2. 翩跹彩蝶 (Butterfly) - 3D扇翼动力学、工笔丝脉、金粉微斑
+ * 3. 沉香金叶 (GinkgoLeaf) - 银杏扇叶辐射脉络、微风翻卷起伏
+ * 4. 素白青鸟 (OrigamiCrane) - 千纸鹤折纸切面、素雅纸张光影
+ * 5. 自定义挂件 (CustomPendant) - 支持用户上传任意透明PNG图案
+ */
+
+// 色彩方案
+class KoiPalette {
+  static PRESETS = {
+    cinnabar: {
+      name: "朱砂红金 (原版)",
+      head: "#FF5E36",
+      bodyPrimary: "#E63946",
+      bodySecondary: "#FF7B54",
+      belly: "#FFF5F2",
+      finBase: "rgba(255, 90, 70, 0.42)",
+      finEdge: "rgba(72, 219, 251, 0.75)",
+      goldShine: "rgba(255, 220, 100, 0.85)",
+      spotColor: "#D63031"
+    },
+    golden: {
+      name: "锦绣赤金",
+      head: "#FFA502",
+      bodyPrimary: "#FF7F50",
+      bodySecondary: "#FFA502",
+      belly: "#FFFDF0",
+      finBase: "rgba(255, 160, 40, 0.42)",
+      finEdge: "rgba(255, 230, 150, 0.8)",
+      goldShine: "rgba(255, 240, 140, 0.9)",
+      spotColor: "#FF6348"
+    },
+    cyan: {
+      name: "翠微碧波",
+      head: "#1DD1A1",
+      bodyPrimary: "#10AC84",
+      bodySecondary: "#48DBFB",
+      belly: "#F0FFFF",
+      finBase: "rgba(72, 219, 251, 0.4)",
+      finEdge: "rgba(29, 209, 161, 0.75)",
+      goldShine: "rgba(200, 247, 197, 0.85)",
+      spotColor: "#10AC84"
+    },
+    monochrome: {
+      name: "水墨丹顶",
+      head: "#EE5253",
+      bodyPrimary: "#2F3542",
+      bodySecondary: "#57606F",
+      belly: "#F1F2F6",
+      finBase: "rgba(87, 96, 111, 0.35)",
+      finEdge: "rgba(47, 53, 66, 0.6)",
+      goldShine: "rgba(255, 255, 255, 0.75)",
+      spotColor: "#2F3542"
+    },
+    iridescent: {
+      name: "五彩幻锦",
+      head: "#FF6B81",
+      bodyPrimary: "#FF4757",
+      bodySecondary: "#FFA502",
+      belly: "#FFF5F5",
+      finBase: "rgba(255, 159, 243, 0.45)",
+      finEdge: "rgba(84, 160, 255, 0.75)",
+      goldShine: "rgba(254, 202, 87, 0.85)",
+      spotColor: "#FF4757"
+    }
+  };
+}
+
+// ==========================================
+// 1. 灵动锦鲤 (KoiFish) - 东方水彩流线锦鲤
+// ==========================================
+class KoiFish {
+  constructor(options = {}) {
+    this.type = "koi";
+    this.strandIndex = options.strandIndex ?? 0;
+    this.heightRatio = options.heightRatio ?? 0.5;
+    this.seed = options.seed ?? Math.floor(Math.random() * 10000);
+    this.size = options.size ?? (28 + (this.seed % 18));
+    this.speed = options.speed ?? (0.85 + (this.seed % 4) * 0.1);
+    this.wiggleAmp = options.wiggleAmp ?? 1.0;
+    this.facing = options.facing ?? (Math.random() > 0.5 ? 1 : -1);
+    this.tiltAngle = options.tiltAngle ?? ((Math.random() - 0.5) * 0.25);
+    this.colorTheme = options.colorTheme ?? "cinnabar";
+    this.phase = options.phase ?? Math.random() * Math.PI * 2;
+    this.tailPhase = options.tailPhase ?? Math.random() * Math.PI * 2;
+    this.tailSpeed = 2.4 + (this.seed % 5) * 0.35;
+    this.bobPhase = options.bobPhase ?? Math.random() * Math.PI * 2;
+    this.radialOffset = options.radialOffset ?? ((Math.random() - 0.5) * 10);
+
+    this.tailWag = 0;
+    this.bob = 0;
+    this.tilt = 0;
+  }
+
+  update(time, wind = { x: 0, y: 0 }) {
+    const t = time * this.speed;
+    const windWiggle = (wind.x + wind.y) * 0.05;
+    this.tailWag = Math.sin(t * this.tailSpeed + this.tailPhase) * this.wiggleAmp;
+    this.finWag = Math.sin(t * this.tailSpeed * 1.3 + this.tailPhase);
+    this.bob = Math.sin(t * 1.3 + this.bobPhase) * 2.2;
+    this.tilt = this.tiltAngle + this.tailWag * 0.035 + windWiggle;
+  }
+
+  draw(ctx, options = {}) {
+    const scale = options.scale ?? 1.0;
+    const opacity = options.opacity ?? 1.0;
+    if (opacity <= 0.01) return;
+
+    const paletteKey = options.colorTheme || this.colorTheme;
+    const pal = KoiPalette.PRESETS[paletteKey] || KoiPalette.PRESETS.cinnabar;
+
+    ctx.save();
+    ctx.translate(0, this.bob);
+    ctx.rotate(this.tilt);
+    ctx.scale(this.facing * scale, scale);
+    ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+
+    const s = this.size;
+    const bodyLen = s * 0.95;
+    const bodyH = s * 0.30;
+
+    // 1. 分叉三角 wagging 摇摆尾鳍
+    ctx.save();
+    ctx.translate(-bodyLen * 0.42, 0);
+    ctx.rotate(this.tailWag * 0.55);
+    ctx.beginPath();
+    ctx.moveTo(0, -bodyH * 0.30);
+    ctx.lineTo(-bodyLen * 0.55, -bodyH * 0.95);
+    ctx.lineTo(-bodyLen * 0.32, 0);
+    ctx.lineTo(-bodyLen * 0.55, bodyH * 0.95);
+    ctx.lineTo(0, bodyH * 0.30);
+    ctx.closePath();
+    ctx.fillStyle = pal.bodyPrimary || pal.head || "#e8503a";
+    ctx.globalAlpha = opacity * 0.82;
+    ctx.fill();
+
+    // 尾鳍透光细纹
+    ctx.strokeStyle = pal.finEdge || pal.belly || "#fff3e6";
+    ctx.lineWidth = 0.7;
+    ctx.globalAlpha = opacity * 0.45;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-bodyLen * 0.45, -bodyH * 0.65);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-bodyLen * 0.45, bodyH * 0.65);
+    ctx.stroke();
+    ctx.restore();
+
+    // 2. 灵动背鳍 (dorsal fin)
+    ctx.beginPath();
+    ctx.moveTo(-bodyLen * 0.05, -bodyH * 0.75);
+    ctx.quadraticCurveTo(-bodyLen * 0.28, -bodyH * 1.55, -bodyLen * 0.42, -bodyH * 0.70);
+    ctx.closePath();
+    ctx.fillStyle = pal.bodyPrimary || "#e8503a";
+    ctx.globalAlpha = opacity * 0.65;
+    ctx.fill();
+
+    // 3. 纺锤形水彩流线鱼身 (尖吻尖尾，无臃肿模糊)
+    ctx.beginPath();
+    ctx.moveTo(bodyLen * 0.50, 0);
+    ctx.quadraticCurveTo(bodyLen * 0.30, -bodyH * 1.05, -bodyLen * 0.20, -bodyH * 0.72);
+    ctx.quadraticCurveTo(-bodyLen * 0.42, -bodyH * 0.30, -bodyLen * 0.42, 0);
+    ctx.quadraticCurveTo(-bodyLen * 0.42, bodyH * 0.30, -bodyLen * 0.20, bodyH * 0.72);
+    ctx.quadraticCurveTo(bodyLen * 0.30, bodyH * 1.05, bodyLen * 0.50, 0);
+    ctx.closePath();
+
+    // 肚腹水色底图
+    ctx.fillStyle = pal.belly || "#fff3e6";
+    ctx.globalAlpha = opacity * 0.94;
+    ctx.fill();
+
+    // 主色水彩层
+    ctx.fillStyle = pal.bodyPrimary || "#e8503a";
+    ctx.globalAlpha = opacity * 0.72;
+    ctx.fill();
+
+    // 4. 鱼背微光透亮斑 (soft glowing patch)
+    ctx.beginPath();
+    ctx.ellipse(-bodyLen * 0.05, -bodyH * 0.25, bodyLen * 0.24, bodyH * 0.45, 0.15, 0, Math.PI * 2);
+    ctx.fillStyle = pal.bodySecondary || pal.head || "#ffb199";
+    ctx.globalAlpha = opacity * 0.45;
+    ctx.fill();
+
+    // 5. 丹顶红斑或锦斑 (koi spot)
+    if (pal.spotColor) {
+      ctx.beginPath();
+      ctx.ellipse(bodyLen * 0.18, -bodyH * 0.15, bodyLen * 0.14, bodyH * 0.32, 0.2, 0, Math.PI * 2);
+      ctx.fillStyle = pal.spotColor;
+      ctx.globalAlpha = opacity * 0.68;
+      ctx.fill();
+    }
+
+    // 6. 腹侧微振胸鳍 (pectoral fin)
+    ctx.beginPath();
+    ctx.moveTo(bodyLen * 0.08, bodyH * 0.55);
+    const finWag = (this.finWag || 0) * bodyH * 0.15;
+    ctx.quadraticCurveTo(bodyLen * 0.02, bodyH * 1.15 + finWag, -bodyLen * 0.18, bodyH * 0.85);
+    ctx.closePath();
+    ctx.fillStyle = pal.bodySecondary || pal.head || "#ffb199";
+    ctx.globalAlpha = opacity * 0.60;
+    ctx.fill();
+
+    // 7. 点睛之笔 (ink dot eye)
+    ctx.globalAlpha = opacity * 0.92;
+    ctx.beginPath();
+    ctx.arc(bodyLen * 0.36, -bodyH * 0.08, s * 0.032, 0, Math.PI * 2);
+    ctx.fillStyle = "#2b1810";
+    ctx.fill();
+
+    // 晶亮微光点
+    ctx.beginPath();
+    ctx.arc(bodyLen * 0.37, -bodyH * 0.09, s * 0.012, 0, Math.PI * 2);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fill();
+
+    // 8. 龙须 (delicate whiskers)
+    ctx.beginPath();
+    ctx.moveTo(bodyLen * 0.48, -bodyH * 0.05);
+    ctx.quadraticCurveTo(bodyLen * 0.64, -bodyH * 0.22, bodyLen * 0.74, -bodyH * 0.14);
+    ctx.moveTo(bodyLen * 0.48, bodyH * 0.05);
+    ctx.quadraticCurveTo(bodyLen * 0.64, bodyH * 0.22, bodyLen * 0.74, bodyH * 0.14);
+    ctx.strokeStyle = pal.bodyPrimary || "#e8503a";
+    ctx.lineWidth = Math.max(0.6, s * 0.022);
+    ctx.globalAlpha = opacity * 0.55;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+// ==========================================
+// 2. 翩跹彩蝶 (Butterfly)
+// ==========================================
+class Butterfly {
+  constructor(options = {}) {
+    this.type = "butterfly";
+    this.strandIndex = options.strandIndex ?? 0;
+    this.heightRatio = options.heightRatio ?? 0.5;
+    this.seed = options.seed ?? Math.floor(Math.random() * 10000);
+    this.size = (options.size ?? (24 + (this.seed % 12))) * 0.95;
+    this.speed = options.speed ?? (1.0 + (this.seed % 4) * 0.15);
+    this.facing = options.facing ?? (Math.random() > 0.5 ? 1 : -1);
+    this.colorTheme = options.colorTheme ?? "cinnabar";
+    this.phase = options.phase ?? Math.random() * Math.PI * 2;
+    this.radialOffset = options.radialOffset ?? ((Math.random() - 0.5) * 12);
+    this.flap = 0;
+  }
+
+  update(time, wind = { x: 0, y: 0 }) {
+    const t = time * 4.2 * this.speed + this.phase;
+    // 3D 扇翅角度：cos(t) 控制双翅开合
+    this.flap = Math.cos(t);
+  }
+
+  draw(ctx, options = {}) {
+    const scale = options.scale ?? 1.0;
+    const opacity = options.opacity ?? 1.0;
+    const paletteKey = options.colorTheme || this.colorTheme;
+    const palette = KoiPalette.PRESETS[paletteKey] || KoiPalette.PRESETS.cinnabar;
+    const s = this.size;
+
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+    if (this.facing < 0) ctx.scale(-1, 1);
+
+    // 扇翅宽度受 3D 投影缩放
+    const flapWidth = Math.max(0.18, Math.abs(this.flap));
+
+    // 绘制双翅 (左后、右前)
+    const sides = [-1, 1];
+    for (let side of sides) {
+      ctx.save();
+      ctx.scale(1, flapWidth * side);
+
+      // 前翅大扇面
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.1);
+      ctx.bezierCurveTo(s * 0.4, -s * 0.9, s * 1.1, -s * 0.95, s * 1.15, -s * 0.4);
+      ctx.bezierCurveTo(s * 1.0, -s * 0.1, s * 0.5, 0, 0, 0);
+      ctx.closePath();
+
+      const foreGrad = ctx.createRadialGradient(s * 0.3, -s * 0.3, s * 0.1, s * 0.6, -s * 0.5, s * 0.9);
+      foreGrad.addColorStop(0.0, palette.head);
+      foreGrad.addColorStop(0.5, palette.bodyPrimary);
+      foreGrad.addColorStop(0.85, palette.finEdge);
+      foreGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+      ctx.fillStyle = foreGrad;
+      ctx.globalAlpha = 0.75;
+      ctx.fill();
+
+      // 后翅小飘带
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(s * 0.5, s * 0.2, s * 0.9, s * 0.5, s * 0.85, s * 0.85);
+      ctx.bezierCurveTo(s * 0.5, s * 0.85, s * 0.2, s * 0.5, 0, s * 0.2);
+      ctx.closePath();
+      ctx.fillStyle = palette.bodySecondary;
+      ctx.globalAlpha = 0.68;
+      ctx.fill();
+
+      // 翅脉与金色晶斑
+      ctx.beginPath();
+      ctx.arc(s * 0.6, -s * 0.45, s * 0.09, 0, Math.PI * 2);
+      ctx.fillStyle = palette.goldShine;
+      ctx.globalAlpha = 0.9;
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 蝶身与触角
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s * 0.08, s * 0.35, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "#2B2A27";
+    ctx.globalAlpha = 0.9;
+    ctx.fill();
+
+    // 纤细触角
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 0.3);
+    ctx.quadraticCurveTo(s * 0.2, -s * 0.55, s * 0.35, -s * 0.6);
+    ctx.moveTo(0, -s * 0.3);
+    ctx.quadraticCurveTo(-s * 0.2, -s * 0.55, -s * 0.35, -s * 0.6);
+    ctx.strokeStyle = "#2B2A27";
+    ctx.lineWidth = 0.75;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+// ==========================================
+// 3. 沉香金叶 / 银杏叶 (GinkgoLeaf)
+// ==========================================
+class GinkgoLeaf {
+  constructor(options = {}) {
+    this.type = "ginkgo";
+    this.strandIndex = options.strandIndex ?? 0;
+    this.heightRatio = options.heightRatio ?? 0.5;
+    this.seed = options.seed ?? Math.floor(Math.random() * 10000);
+    this.size = (options.size ?? (24 + (this.seed % 12))) * 0.92;
+    this.speed = options.speed ?? (0.9 + (this.seed % 4) * 0.1);
+    this.facing = options.facing ?? (Math.random() > 0.5 ? 1 : -1);
+    this.phase = options.phase ?? Math.random() * Math.PI * 2;
+    this.radialOffset = options.radialOffset ?? ((Math.random() - 0.5) * 12);
+    this.sway = 0;
+  }
+
+  update(time, wind = { x: 0, y: 0 }) {
+    const t = time * 2.2 * this.speed + this.phase;
+    this.sway = Math.sin(t) * 0.25 + (wind.x + wind.y) * 0.1;
+  }
+
+  draw(ctx, options = {}) {
+    const scale = options.scale ?? 1.0;
+    const opacity = options.opacity ?? 1.0;
+    const s = this.size;
+
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+    ctx.rotate(this.sway);
+    if (this.facing < 0) ctx.scale(-1, 1);
+
+    // 细长叶柄
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 0.15, s * 0.35, s * 0.25, s * 0.65);
+    ctx.strokeStyle = "rgba(180, 140, 60, 0.75)";
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // 银杏经典扇形叶面
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-s * 0.55, -s * 0.45, -s * 0.85, -s * 0.95, -s * 0.3, -s * 1.15);
+    // 中央微缺口
+    ctx.quadraticCurveTo(0, -s * 0.95, s * 0.3, -s * 1.15);
+    ctx.bezierCurveTo(s * 0.85, -s * 0.95, s * 0.55, -s * 0.45, 0, 0);
+    ctx.closePath();
+
+    const leafGrad = ctx.createRadialGradient(0, 0, s * 0.1, 0, -s * 0.8, s * 1.1);
+    leafGrad.addColorStop(0.0, "#E67E22");
+    leafGrad.addColorStop(0.4, "#F39C12");
+    leafGrad.addColorStop(0.85, "#F1C40F");
+    leafGrad.addColorStop(1.0, "#F9E79F");
+
+    ctx.fillStyle = leafGrad;
+    ctx.globalAlpha = 0.82;
+    ctx.fill();
+
+    // 辐射状细腻叶脉
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+    ctx.lineWidth = 0.6;
+    for (let a = -0.55; a <= 0.55; a += 0.18) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.sin(a) * s * 1.05, -Math.cos(a) * s * 1.05);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+// ==========================================
+// 4. 素白青鸟 / 千纸鹤 (OrigamiCrane)
+// ==========================================
+class OrigamiCrane {
+  constructor(options = {}) {
+    this.type = "crane";
+    this.strandIndex = options.strandIndex ?? 0;
+    this.heightRatio = options.heightRatio ?? 0.5;
+    this.seed = options.seed ?? Math.floor(Math.random() * 10000);
+    this.size = (options.size ?? (24 + (this.seed % 12))) * 0.9;
+    this.speed = options.speed ?? (0.9 + (this.seed % 4) * 0.1);
+    this.facing = options.facing ?? (Math.random() > 0.5 ? 1 : -1);
+    this.phase = options.phase ?? Math.random() * Math.PI * 2;
+    this.radialOffset = options.radialOffset ?? ((Math.random() - 0.5) * 12);
+    this.tilt = 0;
+  }
+
+  update(time, wind = { x: 0, y: 0 }) {
+    const t = time * 2.5 * this.speed + this.phase;
+    this.tilt = Math.sin(t) * 0.18 + wind.x * 0.08;
+  }
+
+  draw(ctx, options = {}) {
+    const scale = options.scale ?? 1.0;
+    const opacity = options.opacity ?? 1.0;
+    const s = this.size;
+
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+    ctx.rotate(this.tilt);
+    if (this.facing < 0) ctx.scale(-1, 1);
+
+    // 折纸千纸鹤多面几何多边形
+    // 1. 左翼
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 0.1);
+    ctx.lineTo(-s * 0.9, -s * 0.6);
+    ctx.lineTo(-s * 0.2, 0);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(240, 245, 250, 0.85)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(180, 195, 210, 0.6)";
+    ctx.stroke();
+
+    // 2. 右翼 (迎光面)
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 0.1);
+    ctx.lineTo(s * 0.9, -s * 0.7);
+    ctx.lineTo(s * 0.25, 0);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(180, 195, 210, 0.6)";
+    ctx.stroke();
+
+    // 3. 头部与颈
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(s * 0.6, -s * 0.25);
+    ctx.lineTo(s * 0.5, -s * 0.2);
+    ctx.lineTo(0, s * 0.15);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(230, 238, 245, 0.9)";
+    ctx.fill();
+    ctx.stroke();
+
+    // 4. 尾羽
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-s * 0.65, s * 0.25);
+    ctx.lineTo(0, s * 0.15);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(215, 225, 235, 0.85)";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+// ==========================================
+// 5. 用户自定义图片挂件 (CustomPendant)
+// ==========================================
+class CustomPendant {
+  constructor(options = {}) {
+    this.type = "custom";
+    this.strandIndex = options.strandIndex ?? 0;
+    this.heightRatio = options.heightRatio ?? 0.5;
+    this.seed = options.seed ?? Math.floor(Math.random() * 10000);
+    this.size = (options.size ?? (26 + (this.seed % 12))) * 1.1;
+    this.speed = options.speed ?? (1.0 + (this.seed % 4) * 0.1);
+    this.facing = options.facing ?? (Math.random() > 0.5 ? 1 : -1);
+    this.phase = options.phase ?? Math.random() * Math.PI * 2;
+    this.radialOffset = options.radialOffset ?? ((Math.random() - 0.5) * 12);
+    this.tilt = 0;
+  }
+
+  update(time, wind = { x: 0, y: 0 }) {
+    const t = time * 2.2 * this.speed + this.phase;
+    this.tilt = Math.sin(t) * 0.15 + (wind.x + wind.y) * 0.08;
+  }
+
+  draw(ctx, options = {}) {
+    const scale = options.scale ?? 1.0;
+    const opacity = options.opacity ?? 1.0;
+    const img = options.customImage;
+    const s = this.size;
+
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+    ctx.rotate(this.tilt);
+    if (this.facing < 0) ctx.scale(-1, 1);
+
+    if (img && img.complete && img.naturalWidth > 0) {
+      // 保持原始长宽比绘制
+      const aspect = img.naturalWidth / img.naturalHeight;
+      let w = s * 1.5;
+      let h = w / aspect;
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    } else {
+      // 占位图形：优雅双玉璜/如意纹
+      ctx.beginPath();
+      ctx.arc(0, 0, s * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(220, 60, 50, 0.85)";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, 0, s * 0.2, 0, Math.PI * 2);
+      ctx.fillStyle = "#FAF8F3";
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+}
+
+// 统一工厂方法
+class PendantFactory {
+  static create(type, options) {
+    switch (type) {
+      case "butterfly":
+        return new Butterfly(options);
+      case "ginkgo":
+        return new GinkgoLeaf(options);
+      case "crane":
+        return new OrigamiCrane(options);
+      case "custom":
+        return new CustomPendant(options);
+      case "koi":
+      default:
+        return new KoiFish(options);
+    }
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.KoiFish = KoiFish;
+  window.Butterfly = Butterfly;
+  window.GinkgoLeaf = GinkgoLeaf;
+  window.OrigamiCrane = OrigamiCrane;
+  window.CustomPendant = CustomPendant;
+  window.PendantFactory = PendantFactory;
+  window.KoiPalette = KoiPalette;
+}
+
+
+/**
+ * sound.js - 金鱼梦 声景与物理风铃交互音频系统
+ * 1. 原生高品质夏日风铃音轨播放器 (wind_chime.m4a / wind_chime.wav)
+ * 2. Web Audio API 物理五声音阶琉璃金属谐波风铃合成器 (支持拂过发声、空间立体声混音)
+ */
+
+class ChimeAudioSystem {
+  constructor() {
+    this.ctx = null;
+    this.masterGain = null;
+    this.isMuted = false;
+    this.volume = 0.75;
+    this.bgAudio = null;
+    this.bgPlaying = false;
+    this.interactiveEnabled = true;
+
+    // 中国经典清幽五声音阶 (宫商角徵羽 高八度清脆风铃频段)
+    // C6, D6, E6, G6, A6, C7, D7, E7, G7, A7
+    this.pentatonicFrequencies = [
+      1046.50, // 宫 (C6)
+      1174.66, // 商 (D6)
+      1318.51, // 角 (E6)
+      1567.98, // 徵 (G6)
+      1760.00, // 羽 (A6)
+      2093.00, // 宫 (C7)
+      2349.32, // 商 (D7)
+      2637.02, // 角 (E7)
+      3135.96, // 徵 (G7)
+      3520.00  // 羽 (A7)
+    ];
+
+    this.lastPlayTime = 0;
+    this.initBgAudio();
+  }
+
+  initContext() {
+    if (!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        this.ctx = new AudioContext();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.setValueAtTime(this.volume, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
+      }
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume();
+    }
+  }
+
+  initBgAudio() {
+    try {
+      this.bgAudio = new Audio();
+      this.bgAudio.src = "wind_chime.m4a";
+      this.bgAudio.loop = true;
+      this.bgAudio.volume = this.volume;
+      this.bgAudio.crossOrigin = "anonymous";
+      this.bgAudio.onerror = () => {
+        // 若 m4a 加载失败尝试 wav
+        if (this.bgAudio.src.endsWith("wind_chime.m4a")) {
+          this.bgAudio.src = "wind_chime.wav";
+        }
+      };
+    } catch (e) {
+      console.warn("Background audio not supported:", e);
+    }
+  }
+
+  startAmbientLoop() {
+    this.stopAmbientLoop();
+    const triggerNext = () => {
+      if (!this.bgPlaying) return;
+      const strandIdx = Math.floor(Math.random() * 26);
+      const vel = 0.35 + Math.random() * 0.45;
+      const pan = (Math.random() - 0.5) * 1.6;
+      this.playChime(strandIdx, vel, pan);
+      const nextDelay = 800 + Math.random() * 2000;
+      this.ambientTimer = setTimeout(triggerNext, nextDelay);
+    };
+    triggerNext();
+  }
+
+  stopAmbientLoop() {
+    if (this.ambientTimer) {
+      clearTimeout(this.ambientTimer);
+      this.ambientTimer = null;
+    }
+  }
+
+  toggleBgAudio(forceState) {
+    this.initContext();
+    const target = forceState !== undefined ? forceState : !this.bgPlaying;
+    if (target) {
+      this.bgPlaying = true;
+      if (this.bgAudio) {
+        this.bgAudio.play().catch(() => {
+          this.startAmbientLoop();
+        });
+      } else {
+        this.startAmbientLoop();
+      }
+    } else {
+      if (this.bgAudio) {
+        try { this.bgAudio.pause(); } catch(e) {}
+      }
+      this.stopAmbientLoop();
+      this.bgPlaying = false;
+    }
+    return this.bgPlaying;
+  }
+
+  setVolume(vol) {
+    this.volume = Math.max(0, Math.min(1, vol));
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : this.volume, this.ctx.currentTime, 0.05);
+    }
+    if (this.bgAudio) {
+      this.bgAudio.volume = this.isMuted ? 0 : this.volume;
+    }
+  }
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    this.setVolume(this.volume);
+    return this.isMuted;
+  }
+
+  /**
+   * 触发单次清脆琉璃/金属风铃击鸣
+   * @param {number} strandIndex 弦号 (决定音高)
+   * @param {number} velocity 拨动力度 0~1
+   * @param {number} panX 空间立体声相位 -1(左) ~ 1(右)
+   */
+  playChime(strandIndex = 0, velocity = 0.6, panX = 0) {
+    if (!this.interactiveEnabled || this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    // 防止同帧声音堆叠爆音
+    const now = this.ctx.currentTime;
+    if (now - this.lastPlayTime < 0.045) return;
+    this.lastPlayTime = now;
+
+    const noteIdx = Math.abs(strandIndex) % this.pentatonicFrequencies.length;
+    const baseFreq = this.pentatonicFrequencies[noteIdx];
+
+    // 风铃的非谐波金属/玻璃分音参数 (Inharmonic partials)
+    const partials = [
+      { ratio: 1.00, amp: 1.00, decay: 1.6 },
+      { ratio: 2.76, amp: 0.55, decay: 1.1 },
+      { ratio: 5.40, amp: 0.30, decay: 0.7 },
+      { ratio: 8.93, amp: 0.15, decay: 0.4 }
+    ];
+
+    // 空间立体声 Panner
+    let outNode = this.masterGain;
+    if (this.ctx.createStereoPanner) {
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panX)), now);
+      panner.connect(this.masterGain);
+      outNode = panner;
+    }
+
+    const vel = Math.max(0.15, Math.min(1.0, velocity));
+
+    // 逐个生成分音振荡器
+    partials.forEach(p => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      // 正弦与微量三角波混合出金属与玻璃质感
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(baseFreq * p.ratio, now);
+
+      // 极轻微音高下弯微颤，模拟金属撞击张力变化
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * p.ratio * 0.996, now + p.decay);
+
+      // 包络线：瞬态敲击 (Attack 1.5ms) + 指数平滑释音 (Exponential Decay)
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(vel * p.amp * 0.22, now + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + p.decay);
+
+      osc.connect(gain);
+      gain.connect(outNode);
+
+      osc.start(now);
+      osc.stop(now + p.decay + 0.05);
+    });
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.ChimeAudioSystem = ChimeAudioSystem;
+}
+
+
+/**
+ * sketch.js - 金鱼梦 交互主循环与 Verlet 软绳渲染流水线
+ * 遵循单源配置原则（Single Source of Truth），所有可调参数统一在顶部集中暴露
+ */
+
+// ==========================================
+// 全局可调参数配置 (Single Source of Truth)
+// ==========================================
+const CONFIG = {
+  // 结构参数
+  numRings: 7,            // 同心圆环数 (3~8)
+  numStrands: 34,         // 垂线总数 (12~48)
+  topRadius: 195,         // 顶部外环半径 (px)
+  dropLength: 680,        // 悬垂深度 (px)
+  spreadRatio: 0.95,      // 底部微扩散收拢比例
+  ringPitch: 0.38,        // 3D俯视仰角倾斜度
+
+  // 挂件形态与算法参数
+  pendantType: "koi",     // 挂件形态: koi (锦鲤), butterfly (彩蝶), ginkgo (银杏叶), crane (千纸鹤), custom (自定义)
+  koiCount: 26,           // 挂件总数 (4~45)
+  koiScale: 1.05,         // 尺寸缩放倍率 (0.6~1.8)
+  koiSpeed: 1.0,          // 游频/扇翅速率 (0.4~2.2)
+  koiWiggleAmp: 1.0,      // 摆幅大小 (0.3~2.0)
+  koiColorTheme: "cinnabar", // 配色方案: cinnabar (朱砂), golden (赤金), cyan (翠微), monochrome (水墨), iridescent (幻锦)
+  koiFacingMode: "auto",  // 游动朝向: auto (自由交错), cw (顺时针), ccw (逆时针)
+
+  // 琉璃珠饰与空间晶石
+  beadDensity: 1.0,       // 串珠密度倍率
+  beadSize: 1.0,          // 珠粒大小倍率
+  beadTheme: "blueGreen", // 琉璃色泽: blueGreen (天青翡翠), amberGold (琥珀流金), purpleCrystal (紫玉荧晶), iceWhite (冰雪清透)
+  dewParticles: true,     // 飘落水露微粒
+
+  // 物理核心：微弱重力、柳叶垂落、超低频柔性风动与圆锥软限幅
+  gravity: 0.055,         // 微弱重力回复力 (0.01~0.25，柔顺回正拉力)
+  segPhaseLag: 0.42,      // 沿线每节非同步相位差 (0.1~0.8 rad，形成轻柔S波)
+  windFlutter: 1.0,       // 非同步微风波纹灵动度
+  waveTension: 0.28,      // 沿线弹性波传导张力
+  airDrag: 0.92,          // 空气流体阻尼 (0.86~0.96，消退柔韧度)
+  windStrength: 1.0,      // 基础微风强度
+  mouseForce: 1.2,        // 鼠标流体推力 (如清风拂过)
+  autoRotateSpeed: 0.0028,// 顶部吊环慢速自转角速度
+  strandWidth: 0.45,      // 极细银丝线宽 (px)
+  pendulumAmp: 5.5,       // 全局顶部悬挂微幅钟摆晃动摆幅 (px)
+
+  // 背景
+  bgTheme: "ricePaper",   // 背景底色: ricePaper (澄心堂暖宣白), warmSilk (温润素绢), bambooGreen (潇湘竹青), darkNight (玄夜玄墨)
+
+  // 音频设置
+  bgAudioEnabled: false,  // 原声风铃背景音
+  chimeAudioEnabled: true,// 触碰交互发声
+  volume: 0.75            // 主音量
+};
+
+if (typeof window !== "undefined") {
+  window.CONFIG = CONFIG;
+}
+
+function hash(seed) {
+  let s = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+function clamp(v, a, b) {
+  return Math.max(a, Math.min(b, v));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+class VerletNode {
+  constructor(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.ox = x;
+    this.oy = y;
+    this.oz = z;
+  }
+}
+
+class WindChimeApp {
+  constructor() {
+    this.canvas = document.getElementById("chimeCanvas");
+    this.ctx = this.canvas.getContext("2d");
+
+    // 全局设置参数：严格继承自顶部 CONFIG
+    this.config = Object.assign({}, window.CONFIG || CONFIG);
+
+    // 运行状态
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    // 3D 旋转角度与惯性
+    this.rotY = 0;
+    this.rotX = this.config.ringPitch;
+    this.targetRotX = this.rotX;
+    this.rotVelocityY = this.config.autoRotateSpeed;
+
+    this.mouse = { x: -1000, y: -1000, vx: 0, vy: 0, prevX: 0, prevY: 0, isDown: false };
+    this.mouseDownPos = { x: 0, y: 0 };
+    this.time = 0;
+
+    this.customImage = null;
+    this.unfoldProgress = 1.0;
+    this.isUnfolding = false;
+    this.unfoldStartTime = 0;
+
+    // 悬挂钟摆与阵风波脉
+    this.chimeCenter = { x: 0, z: 0 };
+    this.gusts = [];
+
+    // 实体集合
+    this.rings = [];
+    this.strands = [];
+    this.kois = [];
+    this.particles = [];
+
+    // 音频系统
+    this.audio = new ChimeAudioSystem();
+
+    this.initCanvas();
+    this.buildChimeStructure();
+    this.initParticles();
+    this.bindEvents();
+
+    this.loop = this.loop.bind(this);
+    requestAnimationFrame(this.loop);
+  }
+
+  initCanvas() {
+    const w = window.innerWidth || document.documentElement.clientWidth;
+    const h = window.innerHeight || document.documentElement.clientHeight;
+    this.width = w > 50 ? w : 1280;
+    this.height = h > 50 ? h : 800;
+    this.canvas.width = this.width * this.dpr;
+    this.canvas.height = this.height * this.dpr;
+    this.canvas.style.width = this.width + "px";
+    this.canvas.style.height = this.height + "px";
+    this.ctx.scale(this.dpr, this.dpr);
+  }
+
+  triggerUnfoldAnimation() {
+    this.isUnfolding = true;
+    this.unfoldProgress = 0.0;
+    this.unfoldStartTime = performance.now();
+  }
+
+  triggerGust(power = 1.0) {
+    this.gusts.push({
+      startTime: this.time,
+      power: power
+    });
+    if (this.gusts.length > 5) this.gusts.shift();
+    if (this.audio) {
+      const strandIdx = Math.floor(Math.random() * (this.strands.length || 1));
+      this.audio.playChime(strandIdx, 0.85, 0);
+    }
+  }
+
+  buildChimeStructure() {
+    this.rings = [];
+    this.strands = [];
+    this.kois = [];
+
+    const numR = this.config.numRings;
+    const maxR = this.config.topRadius;
+
+    // 1. 同心圆环
+    for (let i = 0; i < numR; i++) {
+      const r = maxR * ((i + 1) / numR);
+      this.rings.push({
+        index: i,
+        radius: r,
+        y: 0
+      });
+    }
+
+    // 2. 构建多质点柔性软绳垂线
+    const numS = this.config.numStrands;
+    const numNodes = 18; // 每根垂线 18 个质点，支持细腻连续的非同步 S 形柳条波浪
+
+    for (let i = 0; i < numS; i++) {
+      const ringIdx = Math.floor(Math.sqrt(Math.random()) * numR);
+      const ring = this.rings[Math.min(ringIdx, numR - 1)];
+
+      const angle = (i / numS) * Math.PI * 2 + (ringIdx * 0.45);
+      const radius = ring.radius;
+      const baseLen = this.config.dropLength * (0.82 + 0.28 * Math.random());
+      const segLen = baseLen / (numNodes - 1);
+
+      // 顶部世界坐标
+      const topX = Math.cos(angle + this.rotY) * radius;
+      const topY = 0;
+      const topZ = Math.sin(angle + this.rotY) * radius;
+
+      // 初始化 18 个质点
+      const nodes = [];
+      for (let n = 0; n < numNodes; n++) {
+        const ny = topY + n * segLen;
+        nodes.push(new VerletNode(topX, ny, topZ));
+      }
+
+      // 晶石珠子 (疏密有致，如露珠点缀细丝)
+      const beads = [];
+      const numBeads = Math.floor((5 + Math.random() * 4) * this.config.beadDensity);
+      for (let b = 0; b < numBeads; b++) {
+        const ratio = (b + 1) / (numBeads + 1) + (Math.random() - 0.5) * 0.05;
+        beads.push({
+          ratio: Math.max(0.08, Math.min(0.95, ratio)),
+          type: Math.random() > 0.45 ? "blue" : "green",
+          size: (2.2 + Math.random() * 1.8) * this.config.beadSize,
+          shape: Math.random() > 0.35 ? "diamond" : "drop"
+        });
+      }
+
+      this.strands.push({
+        id: i,
+        ringIndex: ringIdx,
+        radius: radius,
+        baseAngle: angle,
+        length: baseLen,
+        segLen: segLen,
+        numNodes: numNodes,
+        nodes: nodes,
+        beads: beads,
+        projectedPts: [],
+        freq: 0.28 + hash(i * 3.1) * 0.26,
+        freq2: (0.28 + hash(i * 3.1) * 0.26) * 1.8 + hash(i * 8.8) * 0.15,
+        delayStep: 0.38 + hash(i * 2.2) * 0.28,
+        phase: hash(i * 7.7) * Math.PI * 2,
+        phaseZ: hash(i * 13.3) * Math.PI * 2,
+        ampMul: 0.65 + hash(i * 11.3) * 0.70,
+        dirX: hash(i * 5.5) > 0.5 ? 1 : -1,
+        dirZ: hash(i * 9.1) > 0.5 ? 1 : -1
+      });
+    }
+
+    // 3. 构建挂件
+    const numK = this.config.koiCount;
+    for (let k = 0; k < numK; k++) {
+      const strandIdx = Math.floor(Math.random() * this.strands.length);
+      const heightRatio = 0.18 + 0.76 * (k / (numK - 1 || 1)) + (Math.random() - 0.5) * 0.04;
+
+      let facing = 1;
+      if (this.config.koiFacingMode === "cw") facing = 1;
+      else if (this.config.koiFacingMode === "ccw") facing = -1;
+      else facing = Math.random() > 0.45 ? 1 : -1;
+
+      const pendant = PendantFactory.create(this.config.pendantType, {
+        strandIndex: strandIdx,
+        heightRatio: Math.max(0.06, Math.min(0.95, heightRatio)),
+        size: (24 + Math.random() * 14) * this.config.koiScale,
+        speed: (0.85 + Math.random() * 0.4) * this.config.koiSpeed,
+        wiggleAmp: this.config.koiWiggleAmp,
+        facing: facing,
+        tiltAngle: (Math.random() - 0.5) * 0.25,
+        colorTheme: this.config.koiColorTheme,
+        phase: Math.random() * Math.PI * 2
+      });
+
+      this.kois.push(pendant);
+    }
+  }
+
+  initParticles() {
+    this.particles = [];
+    for (let i = 0; i < 35; i++) {
+      this.particles.push({
+        x: (Math.random() - 0.5) * 450,
+        y: -300 + Math.random() * 900,
+        z: (Math.random() - 0.5) * 450,
+        radius: 1.2 + Math.random() * 2.0,
+        alpha: 0.25 + Math.random() * 0.55,
+        speedY: 0.35 + Math.random() * 0.65,
+        driftPhase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  bindEvents() {
+    window.addEventListener("resize", () => {
+      this.initCanvas();
+    });
+
+    const onMove = (x, y) => {
+      this.mouse.vx = x - this.mouse.prevX;
+      this.mouse.vy = y - this.mouse.prevY;
+      this.mouse.prevX = x;
+      this.mouse.prevY = y;
+      this.mouse.x = x;
+      this.mouse.y = y;
+
+      if (this.mouse.isDown) {
+        const deltaRot = this.mouse.vx * 0.0038;
+        this.rotY += deltaRot;
+        this.rotVelocityY = deltaRot;
+        this.targetRotX = Math.max(0.12, Math.min(0.85, this.targetRotX - this.mouse.vy * 0.003));
+      }
+    };
+
+    window.addEventListener("mousemove", (e) => onMove(e.clientX, e.clientY));
+
+    window.addEventListener("mousedown", (e) => {
+      if (e.target.closest("#settingsDrawer") || e.target.closest("#togglePanelBtn") || e.target.closest(".floating-bar")) return;
+      this.mouse.isDown = true;
+      this.mouse.prevX = e.clientX;
+      this.mouse.prevY = e.clientY;
+      this.mouseDownPos = { x: e.clientX, y: e.clientY };
+      this.rotVelocityY = 0;
+      this.audio.initContext();
+    });
+
+    window.addEventListener("mouseup", (e) => {
+      if (this.mouse.isDown && this.mouseDownPos) {
+        const moveDist = Math.hypot(e.clientX - this.mouseDownPos.x, e.clientY - this.mouseDownPos.y);
+        if (moveDist < 6) {
+          // 单击画布：拂来清风，激发自上而下波纹与清脆风铃
+          this.triggerGust(1.0);
+        }
+      }
+      this.mouse.isDown = false;
+    });
+
+    window.addEventListener("touchmove", (e) => {
+      if (e.touches.length > 0) onMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    window.addEventListener("touchstart", (e) => {
+      if (e.touches.length > 0) {
+        if (e.target.closest("#settingsDrawer") || e.target.closest("#togglePanelBtn") || e.target.closest(".floating-bar")) return;
+        this.mouse.isDown = true;
+        this.mouse.prevX = e.touches[0].clientX;
+        this.mouse.prevY = e.touches[0].clientY;
+        this.mouseDownPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        this.rotVelocityY = 0;
+        this.audio.initContext();
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", (e) => {
+      if (this.mouse.isDown && this.mouseDownPos) {
+        const endX = e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0].clientX : this.mouse.x;
+        const endY = e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0].clientY : this.mouse.y;
+        const moveDist = Math.hypot(endX - this.mouseDownPos.x, endY - this.mouseDownPos.y);
+        if (moveDist < 8) {
+          this.triggerGust(1.0);
+        }
+      }
+      this.mouse.isDown = false;
+    });
+  }
+
+  // 3D 弱透视空间投影
+  project3D(x, y, z, cx, cy) {
+    const cosX = Math.cos(this.rotX);
+    const sinX = Math.sin(this.rotX);
+    const y2 = y * cosX - z * sinX;
+    const z2 = y * sinX + z * cosX;
+
+    const cameraDist = 950;
+    const fov = cameraDist / (cameraDist + z2);
+
+    return {
+      x: cx + x * fov,
+      y: cy + y2 * fov,
+      z: z2,
+      scale: fov
+    };
+  }
+
+  updatePhysics() {
+    this.time += 0.016;
+
+    if (this.isUnfolding) {
+      const elapsed = (performance.now() - this.unfoldStartTime) / 1000;
+      this.unfoldProgress = Math.min(1.0, elapsed / 3.2);
+      if (this.unfoldProgress >= 1.0) this.isUnfolding = false;
+    }
+
+    // 1. 顶部自转与惯性滑行
+    if (!this.mouse.isDown) {
+      this.rotVelocityY = this.rotVelocityY * 0.965 + this.config.autoRotateSpeed * 0.035;
+      this.rotY += this.rotVelocityY;
+    }
+    this.rotX += (this.targetRotX - this.rotX) * 0.08;
+
+    const cx = this.width / 2;
+    const cy = this.height * 0.20;
+
+    // 2. 全局悬挂微幅钟摆晃动 (整套风铃在微风中做自然的悬垂轻摆)
+    const pendulumAmp = (this.config.pendulumAmp ?? 5.5) * this.config.windStrength;
+    this.chimeCenter.x = Math.sin(this.time * 0.75) * pendulumAmp;
+    this.chimeCenter.z = Math.cos(this.time * 0.55) * (pendulumAmp * 0.65);
+    const chimeX = this.chimeCenter.x;
+    const chimeZ = this.chimeCenter.z;
+
+    // 3. 柳叶微重力、超低频行波、柔性 Verlet 软绳动力学仿真
+    const g = Math.max(0.01, Math.min(0.25, this.config.gravity ?? 0.055));
+    const drag = Math.max(0.86, Math.min(0.96, this.config.airDrag ?? 0.92));
+    const maxOffset = 38 * (this.config.windFlutter ?? 1.0);
+    const unfoldFactor = Math.min(1.0, Math.max(0.01, (this.unfoldProgress - 0.2) / 0.8));
+
+    for (let strand of this.strands) {
+      // 顶部锚点随环自转与全局悬垂钟摆的世界坐标
+      const topAngle = strand.baseAngle + this.rotY;
+      const topX = chimeX + Math.cos(topAngle) * strand.radius;
+      const topY = 0;
+      const topZ = chimeZ + Math.sin(topAngle) * strand.radius;
+
+      strand.nodes[0].x = topX;
+      strand.nodes[0].y = topY;
+      strand.nodes[0].z = topZ;
+      strand.nodes[0].ox = topX;
+      strand.nodes[0].oy = topY;
+      strand.nodes[0].oz = topZ;
+
+      const curSegLen = strand.segLen * unfoldFactor;
+      const activeSeg = Math.max(1, Math.round(unfoldFactor * (strand.numNodes - 1)));
+
+      for (let j = 1; j < strand.numNodes; j++) {
+        const node = strand.nodes[j];
+        const reach = j / (strand.numNodes - 1);
+
+        if (j > activeSeg) {
+          node.x = node.ox = topX;
+          node.y = node.oy = topY + j * curSegLen;
+          node.z = node.oz = topZ;
+          continue;
+        }
+
+        // Verlet 速度积分 (惯性与空气阻尼)
+        let vx = (node.x - node.ox) * drag;
+        let vy = (node.y - node.oy) * drag;
+        let vz = (node.z - node.oz) * drag;
+
+        node.ox = node.x;
+        node.oy = node.y;
+        node.oz = node.z;
+
+        // 超低频行波驱动 (0.28 ~ 0.55 rad/s，非同步 S 曲线)
+        const w1 = Math.sin(this.time * strand.freq  - j * strand.delayStep        + strand.phase)       * strand.ampMul;
+        const w2 = Math.sin(this.time * strand.freq2 - j * strand.delayStep * 1.35  + strand.phase * 1.7) * strand.ampMul * 0.40;
+        const windForceX = (w1 + w2) * this.config.windStrength * reach * strand.dirX;
+
+        const wz1 = Math.sin(this.time * strand.freq * 0.92 - j * strand.delayStep * 0.88 + strand.phaseZ) * strand.ampMul;
+        const windForceZ = wz1 * this.config.windStrength * reach * strand.dirZ * 0.65;
+
+        // 拂来清风与点击激发的下行脉冲涟漪
+        let gustX = 0, gustZ = 0;
+        for (let g of this.gusts) {
+          const dt = this.time - g.startTime;
+          const travelDelay = j * 0.07 + (strand.radius / 195) * 0.12;
+          const localDt = dt - travelDelay;
+          if (localDt > 0 && localDt < 2.2) {
+            const pulse = Math.exp(-Math.pow((localDt - 0.35) / 0.28, 2)) * g.power * reach;
+            const ripple = Math.sin(localDt * 4.6) * pulse * 3.2;
+            gustX += ripple * strand.dirX;
+            gustZ += ripple * 0.5 * strand.dirZ;
+          }
+        }
+
+        // 鼠标流体推力 (如清风拂过)
+        let mouseX = 0, mouseZ = 0;
+        if (Math.hypot(this.mouse.vx, this.mouse.vy) > 0.6) {
+          const proj = this.project3D(node.x, node.y, node.z, cx, cy);
+          const dx = proj.x - this.mouse.x;
+          const dy = proj.y - this.mouse.y;
+          const dist = Math.hypot(dx, dy);
+          const radius = 95;
+          if (dist < radius) {
+            const falloff = Math.pow(1 - dist / radius, 1.4);
+            mouseX = this.mouse.vx * 0.25 * falloff * this.config.mouseForce;
+            mouseZ = this.mouse.vy * 0.20 * falloff * this.config.mouseForce;
+
+            if (j === Math.floor(strand.numNodes / 2)) {
+              const pan = (proj.x - cx) / (this.width * 0.45);
+              this.audio.playChime(strand.id, falloff * 0.75, pan);
+            }
+          }
+        }
+
+        // 施加加速度并积分
+        node.x += vx + (windForceX + gustX + mouseX) * 0.16;
+        node.y += vy + g;
+        node.z += vz + (windForceZ + gustZ + mouseZ) * 0.16;
+
+        // 围绕垂线的圆锥软限幅 (保证下垂感与垂直度，杜绝发散与横向飘飞)
+        const curMax = maxOffset * reach;
+        node.x = clamp(node.x, topX - curMax, topX + curMax);
+        node.z = clamp(node.z, topZ - curMax, topZ + curMax);
+      }
+
+      // 4 次 3D Verlet 距离松弛 (严格保持丝线恒长，杜绝橡皮筋弹力与拉伸)
+      for (let iter = 0; iter < 4; iter++) {
+        for (let j = 0; j < strand.numNodes - 1; j++) {
+          const a = strand.nodes[j];
+          const b = strand.nodes[j + 1];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dz = b.z - a.z;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) || 0.0001;
+          const diff = (dist - curSegLen) / dist * 0.5;
+          const ox = dx * diff;
+          const oy = dy * diff;
+          const oz = dz * diff;
+          if (j > 0) {
+            a.x += ox; a.y += oy; a.z += oz;
+          }
+          b.x -= ox; b.y -= oy; b.z -= oz;
+        }
+      }
+
+      // 预计算所有质点的 3D 屏幕投影
+      strand.projectedPts = strand.nodes.map(n => this.project3D(n.x, n.y, n.z, cx, cy));
+    }
+
+    // 3. 挂件姿态与游动动力学更新
+    for (let pendant of this.kois) {
+      const baseSz = 26 + ((pendant.seed || 0) % 14);
+      pendant.size = baseSz * this.config.koiScale;
+      const baseSp = 0.85 + ((pendant.seed || 0) % 4) * 0.1;
+      pendant.speed = baseSp * this.config.koiSpeed;
+      pendant.wiggleAmp = this.config.koiWiggleAmp;
+      pendant.colorTheme = this.config.koiColorTheme;
+      pendant.update(this.time, { x: 0.1, y: 0.1 });
+    }
+
+    // 4. 甘露水滴更新
+    if (this.config.dewParticles) {
+      for (let pt of this.particles) {
+        pt.y += pt.speedY;
+        pt.x += Math.sin(this.time + pt.driftPhase) * 0.45;
+        if (pt.y > 750) {
+          pt.y = -320;
+          pt.x = (Math.random() - 0.5) * 450;
+          pt.z = (Math.random() - 0.5) * 450;
+        }
+      }
+    }
+  }
+
+  render() {
+    const ctx = this.ctx;
+    const w = this.width;
+    const h = this.height;
+    const cx = w / 2;
+    const cy = h * 0.20;
+    const hangY = cy - 130;
+
+    this.drawBackground(ctx, w, h);
+
+    // 天花板固定吊索（至悬挂挂钩 hangY）
+    const isDark = this.config.bgTheme === "darkNight";
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, -10);
+    ctx.lineTo(cx, hangY);
+    ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.45)" : "rgba(140, 155, 165, 0.55)";
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // 悬挂挂钩结
+    ctx.beginPath();
+    ctx.arc(cx, hangY, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = isDark ? "#FFFFFF" : "#8A9BA8";
+    ctx.fill();
+    ctx.restore();
+
+    // 全局悬挂吊环微幅轻柔钟摆轻晃 (从挂钩处做自然缓摆)
+    const swayAngle = (Math.sin(this.time * 0.12) * 0.026 + Math.sin(this.time * 0.05 + 1.3) * 0.012) * (this.config.windStrength || 1.0);
+    ctx.save();
+    ctx.translate(cx, hangY);
+    ctx.rotate(swayAngle);
+    ctx.translate(-cx, -hangY);
+
+    this.drawCeilingWire(ctx, cx, cy, hangY);
+    this.drawRipplesRings(ctx, cx, cy);
+    this.drawDepthSortedEntities(ctx, cx, cy);
+
+    if (this.config.dewParticles) {
+      this.drawDewParticles(ctx, cx, cy);
+    }
+
+    ctx.restore();
+  }
+
+  drawBackground(ctx, w, h) {
+    const bgThemes = {
+      ricePaper:   { top: "#FAF8F3", bot: "#F3EDE1" },
+      warmSilk:    { top: "#FDFBF7", bot: "#F5EFE6" },
+      bambooGreen: { top: "#F2F7F4", bot: "#E4EDE7" },
+      darkNight:   { top: "#16191D", bot: "#0D0F12" }
+    };
+    const theme = bgThemes[this.config.bgTheme] || bgThemes.ricePaper;
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, theme.top);
+    bgGrad.addColorStop(1, theme.bot);
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+
+  drawCeilingWire(ctx, cx, cy, hangY) {
+    const chX = this.chimeCenter ? this.chimeCenter.x : 0;
+    const chZ = this.chimeCenter ? this.chimeCenter.z : 0;
+    const topProj = this.project3D(chX, 0, chZ, cx, cy);
+    const hy = hangY !== undefined ? hangY : cy - 130;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, hy);
+    ctx.lineTo(topProj.x, topProj.y);
+    const isDark = this.config.bgTheme === "darkNight";
+    ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.45)" : "rgba(140, 155, 165, 0.55)";
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(topProj.x, topProj.y, 2.8, 0, Math.PI * 2);
+    ctx.fillStyle = isDark ? "#FFFFFF" : "#8A9BA8";
+    ctx.fill();
+    ctx.restore();
+  }
+
+  drawRipplesRings(ctx, cx, cy) {
+    const isDark = this.config.bgTheme === "darkNight";
+    const ringProgress = Math.min(1.0, this.unfoldProgress * 1.5);
+    const chX = this.chimeCenter ? this.chimeCenter.x : 0;
+    const chZ = this.chimeCenter ? this.chimeCenter.z : 0;
+
+    ctx.save();
+    ctx.lineWidth = 0.85;
+
+    for (let ring of this.rings) {
+      const curR = ring.radius * ringProgress;
+      if (curR <= 0.5) continue;
+
+      ctx.beginPath();
+      const segs = 64;
+      for (let s = 0; s <= segs; s++) {
+        const theta = (s / segs) * Math.PI * 2 + this.rotY;
+        const rx = chX + Math.cos(theta) * curR;
+        const rz = chZ + Math.sin(theta) * curR;
+        const pt = this.project3D(rx, 0, rz, cx, cy);
+        if (s === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.28)" : "rgba(140, 160, 175, 0.42)";
+      ctx.stroke();
+    }
+
+    for (let k = 0; k < 4; k++) {
+      const ang = (k * Math.PI) / 2 + this.rotY;
+      const maxR = this.config.topRadius * ringProgress;
+      const pt1 = this.project3D(chX, 0, chZ, cx, cy);
+      const pt2 = this.project3D(chX + Math.cos(ang) * maxR, 0, chZ + Math.sin(ang) * maxR, cx, cy);
+
+      ctx.beginPath();
+      ctx.moveTo(pt1.x, pt1.y);
+      ctx.lineTo(pt2.x, pt2.y);
+      ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(160, 175, 185, 0.25)";
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  // 深度排序：统筹渲染垂线、珠子、锦鲤
+  drawDepthSortedEntities(ctx, cx, cy) {
+    const isDark = this.config.bgTheme === "darkNight";
+    const drawList = [];
+
+    // 1. 垂线与珠子
+    for (let strand of this.strands) {
+      const pts = strand.projectedPts;
+      if (!pts || pts.length === 0) continue;
+
+      const midZ = (pts[0].z + pts[pts.length - 1].z) / 2;
+
+      drawList.push({
+        type: "strand",
+        z: midZ,
+        strand: strand,
+        projPts: pts
+      });
+
+      for (let b of strand.beads) {
+        const u = b.ratio;
+        const pIdx = u * (strand.nodes.length - 1);
+        const i0 = Math.floor(pIdx);
+        const i1 = Math.min(strand.nodes.length - 1, i0 + 1);
+        const t = pIdx - i0;
+
+        const bx = strand.nodes[i0].x + (strand.nodes[i1].x - strand.nodes[i0].x) * t;
+        const by = strand.nodes[i0].y + (strand.nodes[i1].y - strand.nodes[i0].y) * t;
+        const bz = strand.nodes[i0].z + (strand.nodes[i1].z - strand.nodes[i0].z) * t;
+
+        const projBead = this.project3D(bx, by, bz, cx, cy);
+        const p0 = strand.projectedPts[i0] || projBead;
+        const p1 = strand.projectedPts[i1] || projBead;
+        const beadAng = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+
+        drawList.push({
+          type: "bead",
+          z: projBead.z,
+          bead: b,
+          proj: projBead,
+          ang: beadAng
+        });
+      }
+    }
+
+    // 2. 挂件 (附着于 Verlet 软绳对应深度，切线微倾联动)
+    const koiProgress = Math.min(1.0, Math.max(0.0, (this.unfoldProgress - 0.35) / 0.65));
+
+    for (let pendant of this.kois) {
+      const strand = this.strands[pendant.strandIndex % this.strands.length];
+      if (!strand || !strand.nodes || strand.nodes.length === 0) continue;
+
+      const nodes = strand.nodes;
+      const u = pendant.heightRatio;
+      const pIdx = u * (nodes.length - 1);
+      const i0 = Math.floor(pIdx);
+      const i1 = Math.min(nodes.length - 1, i0 + 1);
+      const t = pIdx - i0;
+
+      const fx = nodes[i0].x + (nodes[i1].x - nodes[i0].x) * t + pendant.radialOffset;
+      const fy = nodes[i0].y + (nodes[i1].y - nodes[i0].y) * t;
+      const fz = nodes[i0].z + (nodes[i1].z - nodes[i0].z) * t;
+
+      const proj = this.project3D(fx, fy, fz, cx, cy);
+
+      // 挂件附着于丝线，随丝线微倾斜联动
+      const dx = nodes[i1].x - nodes[i0].x;
+      const dy = nodes[i1].y - nodes[i0].y;
+      const strandTilt = Math.atan2(dx, dy) * 0.22;
+
+      drawList.push({
+        type: "pendant",
+        z: proj.z,
+        pendant: pendant,
+        proj: proj,
+        strandTilt: strandTilt,
+        opacity: koiProgress
+      });
+    }
+
+    drawList.sort((a, b) => a.z - b.z);
+
+    for (let item of drawList) {
+      if (item.type === "strand") {
+        this.renderStrand(ctx, item.projPts, isDark);
+      } else if (item.type === "bead") {
+        this.renderBead(ctx, item.bead, item.proj, isDark, item.ang);
+      } else if (item.type === "pendant") {
+        if (item.opacity > 0.02) {
+          ctx.save();
+          ctx.translate(item.proj.x, item.proj.y);
+          ctx.rotate(item.strandTilt || 0);
+          const zScale = item.proj.scale;
+          const depthAlpha = Math.max(0.45, Math.min(1.0, (item.z + 400) / 750));
+          item.pendant.draw(ctx, {
+            scale: zScale,
+            opacity: item.opacity * depthAlpha,
+            customImage: this.customImage
+          });
+          ctx.restore();
+        }
+      }
+    }
+  }
+
+  // 极细通透蚕丝线绘制（通过平滑样条拟合 16 个 Verlet 质点）
+  renderStrand(ctx, projPts, isDark) {
+    if (projPts.length < 2) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(projPts[0].x, projPts[0].y);
+
+    for (let i = 1; i < projPts.length - 1; i++) {
+      const xc = (projPts[i].x + projPts[i + 1].x) / 2;
+      const yc = (projPts[i].y + projPts[i + 1].y) / 2;
+      ctx.quadraticCurveTo(projPts[i].x, projPts[i].y, xc, yc);
+    }
+    ctx.lineTo(projPts[projPts.length - 1].x, projPts[projPts.length - 1].y);
+
+    const lineWidth = Math.max(0.35, Math.min(1.2, this.config.strandWidth));
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.28)" : "rgba(165, 180, 195, 0.40)";
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  renderBead(ctx, bead, proj, isDark, ang = 0) {
+    const x = proj.x;
+    const y = proj.y;
+    const r = bead.size * proj.scale;
+    if (r <= 0.4) return;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(ang !== undefined ? ang - Math.PI / 2 : 0);
+
+    let mainColor, edgeColor;
+    if (this.config.beadTheme === "amberGold") {
+      mainColor = "rgba(255, 180, 50, 0.85)";
+      edgeColor = "rgba(255, 220, 100, 0.9)";
+    } else if (this.config.beadTheme === "purpleCrystal") {
+      mainColor = "rgba(180, 100, 240, 0.85)";
+      edgeColor = "rgba(220, 160, 255, 0.9)";
+    } else if (this.config.beadTheme === "iceWhite") {
+      mainColor = "rgba(230, 245, 255, 0.85)";
+      edgeColor = "rgba(255, 255, 255, 0.95)";
+    } else {
+      if (bead.type === "blue") {
+        mainColor = "rgba(70, 160, 245, 0.85)";
+        edgeColor = "rgba(160, 220, 255, 0.9)";
+      } else {
+        mainColor = "rgba(40, 195, 140, 0.85)";
+        edgeColor = "rgba(170, 245, 210, 0.9)";
+      }
+    }
+
+    if (bead.shape === "diamond") {
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.2);
+      ctx.lineTo(r * 0.75, 0);
+      ctx.lineTo(0, r * 1.2);
+      ctx.lineTo(-r * 0.75, 0);
+      ctx.closePath();
+      ctx.fillStyle = mainColor;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 1.2);
+      ctx.lineTo(r * 0.35, 0);
+      ctx.lineTo(0, 0);
+      ctx.fillStyle = edgeColor;
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fillStyle = mainColor;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(-r * 0.3, -r * 0.3, r * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.globalAlpha = 0.85;
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  drawDewParticles(ctx, cx, cy) {
+    const isDark = this.config.bgTheme === "darkNight";
+    ctx.save();
+    for (let pt of this.particles) {
+      const proj = this.project3D(pt.x, pt.y, pt.z, cx, cy);
+      const pr = pt.radius * proj.scale;
+      if (pr <= 0.2) continue;
+
+      ctx.beginPath();
+      ctx.arc(proj.x, proj.y, pr, 0, Math.PI * 2);
+      ctx.fillStyle = isDark ? "rgba(160, 220, 255, 0.65)" : "rgba(70, 170, 230, 0.65)";
+      ctx.globalAlpha = pt.alpha;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  loop() {
+    this.updatePhysics();
+    this.render();
+    requestAnimationFrame(this.loop);
+  }
+
+  exportPoster(resolutionScale = 2) {
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = this.width * resolutionScale;
+    exportCanvas.height = this.height * resolutionScale;
+    const exportCtx = exportCanvas.getContext("2d");
+    exportCtx.scale(resolutionScale, resolutionScale);
+
+    const origCtx = this.ctx;
+    this.ctx = exportCtx;
+    this.render();
+    this.ctx = origCtx;
+
+    const dataUrl = exportCanvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.download = `金鱼梦_艺术风铃_${Date.now()}.png`;
+    link.href = dataUrl;
+    link.click();
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.WindChimeApp = WindChimeApp;
+}
+
+  </script>
+
+  <!-- 主交互绑定逻辑 -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const app = new WindChimeApp();
+
+      // UI 元素引用
+      const drawer = document.getElementById("settingsDrawer");
+      const togglePanelBtn = document.getElementById("togglePanelBtn");
+      const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+      const bgAudioBtn = document.getElementById("bgAudioBtn");
+      const replayBtn = document.getElementById("replayBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const drawerExportBtn = document.getElementById("drawerExportBtn");
+      const fullscreenBtn = document.getElementById("fullscreenBtn");
+      const resetConfigBtn = document.getElementById("resetConfigBtn");
+
+      // 抽屉展开/折叠
+      togglePanelBtn.addEventListener("click", () => {
+        drawer.classList.toggle("open");
+      });
+      closeDrawerBtn.addEventListener("click", () => {
+        drawer.classList.remove("open");
+      });
+
+      // 原声风铃音乐播放/暂停
+      bgAudioBtn.addEventListener("click", () => {
+        const isPlaying = app.audio.toggleBgAudio();
+        if (isPlaying) {
+          bgAudioBtn.classList.add("active");
+          bgAudioBtn.querySelector(".btn-text").textContent = "暂停原声";
+        } else {
+          bgAudioBtn.classList.remove("active");
+          bgAudioBtn.querySelector(".btn-text").textContent = "风铃原声";
+        }
+      });
+
+      // 重播诗意展开动效
+      replayBtn.addEventListener("click", () => {
+        app.triggerUnfoldAnimation();
+      });
+
+      // 导出高分辨率海报
+      const doExport = () => {
+        app.exportPoster(2);
+      };
+      exportBtn.addEventListener("click", doExport);
+      drawerExportBtn.addEventListener("click", doExport);
+
+      // 全屏切换
+      fullscreenBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // 预设模式切换
+      const presetButtons = document.querySelectorAll(".preset-btn");
+      const presets = {
+        goldenfish: {
+          bgTheme: "ricePaper",
+          koiColorTheme: "cinnabar",
+          beadTheme: "blueGreen",
+          windStrength: 1.0,
+          spreadRatio: 0.95
+        },
+        golden: {
+          bgTheme: "warmSilk",
+          koiColorTheme: "golden",
+          beadTheme: "amberGold",
+          windStrength: 1.2,
+          spreadRatio: 1.05
+        },
+        jade: {
+          bgTheme: "bambooGreen",
+          koiColorTheme: "cyan",
+          beadTheme: "blueGreen",
+          windStrength: 0.8,
+          spreadRatio: 0.9
+        },
+        night: {
+          bgTheme: "darkNight",
+          koiColorTheme: "monochrome",
+          beadTheme: "purpleCrystal",
+          windStrength: 1.4,
+          spreadRatio: 1.1
+        }
+      };
+
+      presetButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          presetButtons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const p = presets[btn.dataset.preset];
+          if (p) {
+            Object.assign(app.config, p);
+            // 同步表单值
+            document.getElementById("bgTheme").value = p.bgTheme;
+            document.getElementById("koiColorTheme").value = p.koiColorTheme;
+            document.getElementById("beadTheme").value = p.beadTheme;
+            document.getElementById("windStrength").value = p.windStrength;
+            document.getElementById("spreadRatio").value = p.spreadRatio;
+            document.getElementById("valWindStrength").textContent = p.windStrength.toFixed(2) + "x";
+            document.getElementById("valSpreadRatio").textContent = p.spreadRatio.toFixed(2);
+            app.buildChimeStructure();
+          }
+        });
+      });
+
+      // 双向绑定辅助函数
+      const bindRange = (id, prop, format = (v) => v, onChange = null) => {
+        const input = document.getElementById(id);
+        const valSpan = document.getElementById("val" + id.charAt(0).toUpperCase() + id.slice(1));
+        if (!input) return;
+
+        input.addEventListener("input", (e) => {
+          const val = parseFloat(e.target.value);
+          app.config[prop] = val;
+          if (valSpan) valSpan.textContent = format(val);
+          if (onChange) onChange(val);
+        });
+      };
+
+      bindRange("numRings", "numRings", v => `${v} 层`, () => app.buildChimeStructure());
+      bindRange("numStrands", "numStrands", v => `${v} 根`, () => app.buildChimeStructure());
+      bindRange("topRadius", "topRadius", v => `${v} px`, () => app.buildChimeStructure());
+      bindRange("dropLength", "dropLength", v => `${v} px`, () => app.buildChimeStructure());
+      bindRange("spreadRatio", "spreadRatio", v => v.toFixed(2));
+
+      bindRange("koiCount", "koiCount", v => `${v} 条`, () => app.buildChimeStructure());
+      bindRange("koiScale", "koiScale", v => `${v.toFixed(2)}x`);
+      bindRange("koiSpeed", "koiSpeed", v => `${v.toFixed(2)}x`);
+      bindRange("koiWiggleAmp", "koiWiggleAmp", v => `${v.toFixed(2)}x`);
+
+      bindRange("beadDensity", "beadDensity", v => `${v.toFixed(2)}x`, () => app.buildChimeStructure());
+      bindRange("beadSize", "beadSize", v => `${v.toFixed(2)}x`);
+
+      bindRange("gravity", "gravity", v => v.toFixed(2));
+      bindRange("segPhaseLag", "segPhaseLag", v => `${v.toFixed(2)} rad`);
+      bindRange("windFlutter", "windFlutter", v => `${v.toFixed(2)}x`);
+      bindRange("airDrag", "airDrag", v => v.toFixed(3));
+      bindRange("strandWidth", "strandWidth", v => `${v.toFixed(2)} px`);
+      bindRange("autoRotateSpeed", "autoRotateSpeed", v => v.toFixed(4));
+      bindRange("windStrength", "windStrength", v => `${v.toFixed(2)}x`);
+      bindRange("pendulumAmp", "pendulumAmp", v => `${v.toFixed(1)} px`);
+
+      // 拂来清风按钮交互
+      const triggerBreeze = () => {
+        app.triggerGust(1.25);
+      };
+      const gustBtn = document.getElementById("gustBtn");
+      if (gustBtn) gustBtn.addEventListener("click", triggerBreeze);
+      const drawerGustBtn = document.getElementById("drawerGustBtn");
+      if (drawerGustBtn) drawerGustBtn.addEventListener("click", triggerBreeze);
+
+      // 快捷键支持 (H: 开关参数抽屉, Esc: 关闭抽屉, Space: 拂来微风)
+      window.addEventListener("keydown", (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (e.key === "h" || e.key === "H") {
+          e.preventDefault();
+          drawer.classList.toggle("open");
+        } else if (e.key === "Escape") {
+          drawer.classList.remove("open");
+        } else if (e.code === "Space") {
+          e.preventDefault();
+          triggerBreeze();
+        }
+      });
+
+      // 手感快捷按钮
+      const feelButtons = [
+        document.getElementById("feelPlumbBtn"),
+        document.getElementById("feelBalancedBtn"),
+        document.getElementById("feelBreezeBtn")
+      ];
+      const setFeelActive = (activeBtn) => {
+        feelButtons.forEach(b => b.classList.remove("active"));
+        if (activeBtn) activeBtn.classList.add("active");
+      };
+
+      // 1. 沉稳垂帘 (垂直感极强，微风拂过有微弱非同步波动，静谧安然)
+      document.getElementById("feelPlumbBtn").addEventListener("click", (e) => {
+        setFeelActive(e.target);
+        app.config.gravity = 0.12;
+        app.config.segPhaseLag = 0.25;
+        app.config.windFlutter = 0.8;
+        app.config.airDrag = 0.95;
+        document.getElementById("gravity").value = 0.12;
+        document.getElementById("valGravity").textContent = "0.12";
+        document.getElementById("segPhaseLag").value = 0.25;
+        document.getElementById("valSegPhaseLag").textContent = "0.25 rad";
+        document.getElementById("windFlutter").value = 0.8;
+        document.getElementById("valWindFlutter").textContent = "0.80x";
+        document.getElementById("airDrag").value = 0.95;
+        document.getElementById("valAirDrag").textContent = "0.950";
+      });
+
+      // 2. 柳叶微风 (原版神韵 - 微弱重力、每节非同步波动、轻盈飘荡)
+      document.getElementById("feelBalancedBtn").addEventListener("click", (e) => {
+        setFeelActive(e.target);
+        app.config.gravity = 0.05;
+        app.config.segPhaseLag = 0.42;
+        app.config.windFlutter = 1.6;
+        app.config.airDrag = 0.94;
+        document.getElementById("gravity").value = 0.05;
+        document.getElementById("valGravity").textContent = "0.05";
+        document.getElementById("segPhaseLag").value = 0.42;
+        document.getElementById("valSegPhaseLag").textContent = "0.42 rad";
+        document.getElementById("windFlutter").value = 1.6;
+        document.getElementById("valWindFlutter").textContent = "1.60x";
+        document.getElementById("airDrag").value = 0.94;
+        document.getElementById("valAirDrag").textContent = "0.940";
+      });
+
+      // 3. 云丝飘荡 (超低微重力，大幅非同步漫卷流转，极度空灵)
+      document.getElementById("feelBreezeBtn").addEventListener("click", (e) => {
+        setFeelActive(e.target);
+        app.config.gravity = 0.02;
+        app.config.segPhaseLag = 0.55;
+        app.config.windFlutter = 2.4;
+        app.config.airDrag = 0.92;
+        document.getElementById("gravity").value = 0.02;
+        document.getElementById("valGravity").textContent = "0.02";
+        document.getElementById("segPhaseLag").value = 0.55;
+        document.getElementById("valSegPhaseLag").textContent = "0.55 rad";
+        document.getElementById("windFlutter").value = 2.4;
+        document.getElementById("valWindFlutter").textContent = "2.40x";
+        document.getElementById("airDrag").value = 0.92;
+        document.getElementById("valAirDrag").textContent = "0.920";
+      });
+      bindRange("volume", "volume", v => `${Math.round(v * 100)}%`, (v) => app.audio.setVolume(v));
+
+      // 下拉选择绑定
+      const bindSelect = (id, prop, rebuild = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("change", (e) => {
+          app.config[prop] = e.target.value;
+          if (rebuild) app.buildChimeStructure();
+        });
+      };
+      // 挂件形态切换
+      const pendantTypeSelect = document.getElementById("pendantType");
+      const customUploadContainer = document.getElementById("customUploadContainer");
+      const uploadImageBtn = document.getElementById("uploadImageBtn");
+      const customImageInput = document.getElementById("customImageInput");
+      const uploadFileName = document.getElementById("uploadFileName");
+
+      pendantTypeSelect.addEventListener("change", (e) => {
+        app.config.pendantType = e.target.value;
+        customUploadContainer.style.display = e.target.value === "custom" ? "block" : "none";
+        app.buildChimeStructure();
+      });
+
+      uploadImageBtn.addEventListener("click", () => {
+        customImageInput.click();
+      });
+
+      customImageInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        uploadFileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            app.customImage = img;
+            app.config.pendantType = "custom";
+            pendantTypeSelect.value = "custom";
+            customUploadContainer.style.display = "block";
+            app.buildChimeStructure();
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      bindSelect("koiColorTheme", "koiColorTheme");
+      bindSelect("koiFacingMode", "koiFacingMode", true);
+      bindSelect("beadTheme", "beadTheme");
+      bindSelect("bgTheme", "bgTheme");
+
+      // 开关绑定
+      document.getElementById("dewParticles").addEventListener("change", (e) => {
+        app.config.dewParticles = e.target.checked;
+      });
+      document.getElementById("chimeAudioEnabled").addEventListener("change", (e) => {
+        app.config.chimeAudioEnabled = e.target.checked;
+        app.audio.interactiveEnabled = e.target.checked;
+      });
+
+      // 恢复默认按钮
+      resetConfigBtn.addEventListener("click", () => {
+        location.reload();
+      });
+    });
+  </script>
+</body>
+</html>
